@@ -7,6 +7,8 @@
 import { dbRefs, onValue } from './firebase-config.js';
 import { 
   formatTimeArabic, 
+  formatTime12H,
+  formatSlotRange12H,
   formatCurrency, 
   calculateBookingPrice, 
   timeStringToMinutes 
@@ -83,34 +85,25 @@ function getDaySlotHours() {
 }
 
 /**
- * Renders all slots in the grid with real-time status colors
+ * Renders both the Tactical Football Pitch Formation and the Slots Grid
  */
 export function renderSlots() {
-  const container = document.getElementById('slotsContainer');
-  if (!container) return;
-
   const slots = getDaySlotHours();
   const settings = getPitchSettings();
   const now = Date.now();
 
-  let html = '';
-
-  slots.forEach((slot, index) => {
+  // Compute status for all slots
+  const evaluatedSlots = slots.map((slot, index) => {
     const slotStartMin = timeStringToMinutes(slot.startTime);
-    const slotEndMin = slotStartMin + 60;
-
-    // Check if any booking covers this slot
     let matchedBooking = null;
     let matchedBookingId = null;
 
     for (const [id, b] of Object.entries(currentDayBookings)) {
       if (b.status === 'cancelled') continue;
-
       const bStartMin = timeStringToMinutes(b.startTime);
       const bDuration = Number(b.durationMinutes) || 60;
       const bEndMin = bStartMin + bDuration;
 
-      // Overlap condition
       if (slotStartMin >= bStartMin && slotStartMin < bEndMin) {
         matchedBooking = b;
         matchedBookingId = id;
@@ -118,78 +111,179 @@ export function renderSlots() {
       }
     }
 
-    // Determine status & visual classes
     let status = 'available'; // Default GREEN
     let statusLabel = 'قابل للحجز';
     let statusClass = 'status-available';
+    let nodeClass = 'status-node-green';
     let pillClass = 'status-pill-green';
     let isClickable = true;
 
     const pricing = calculateBookingPrice(slot.startTime, 1, settings);
     const isNight = pricing.nightHours > 0;
-    const periodTag = isNight 
-      ? '<span class="slot-period-tag period-night">🌙 ليلي</span>' 
-      : '<span class="slot-period-tag period-day">☀️ نهاري</span>';
 
     if (matchedBooking) {
       isClickable = false;
       const isConfirmed = matchedBooking.status === 'confirmed';
       const isPending = matchedBooking.status === 'pending';
-
       const isCurrentTime = now >= matchedBooking.startTimestamp && now < matchedBooking.endTimestamp;
       const isPastTime = now >= matchedBooking.endTimestamp;
 
       if (isPending) {
-        // YELLOW: في انتظار التأكيد
         status = 'pending';
         statusLabel = 'في انتظار التأكيد';
         statusClass = 'status-pending';
+        nodeClass = 'status-node-yellow';
         pillClass = 'status-pill-yellow';
       } else if (isConfirmed) {
         if (isPastTime) {
-          // ORANGE: انتهى الحجز
           status = 'expired';
           statusLabel = 'انتهى الحجز';
           statusClass = 'status-expired';
+          nodeClass = 'status-node-orange';
           pillClass = 'status-pill-orange';
         } else {
-          // RED: محجوز
           status = 'booked';
           statusLabel = isCurrentTime ? '🔴 جاري الآن' : 'محجوز';
           statusClass = 'status-booked';
+          nodeClass = 'status-node-red';
           pillClass = 'status-pill-red';
         }
       }
     }
 
-    const cardId = `slot-card-${index}`;
+    return {
+      slot,
+      index,
+      status,
+      statusLabel,
+      statusClass,
+      nodeClass,
+      pillClass,
+      isClickable,
+      pricing,
+      isNight,
+      matchedBooking
+    };
+  });
+
+  // 1. Render Tactical Pitch Formation (دوائر تشكيلة اللاعبين على أرضية الملعب)
+  renderTacticalFormation(evaluatedSlots);
+
+  // 2. Render Cards Grid
+  renderCardsGrid(evaluatedSlots);
+}
+
+/**
+ * Renders the Tactical Football Pitch with Circles
+ */
+function renderTacticalFormation(evaluatedSlots) {
+  const container = document.getElementById('tacticalPitchFormation');
+  if (!container) return;
+
+  // Split into 4 tactical lines:
+  // Line 1: الصباح (Slots 0 to 3: 09:00 ص - 12:00 م)
+  // Line 2: الظهيرة والعصر (Slots 4 to 7: 01:00 م - 04:00 م)
+  // Line 3: المغرب والعشاء (Slots 8 to 11: 05:00 م - 08:00 م)
+  // Line 4: سهرة الكشافات (Slots 12 to 15: 09:00 م - 12:00 ص)
+  const lines = [
+    { title: '☀️ تشكيلة الصباح (09:00 ص - 01:00 م)', slots: evaluatedSlots.slice(0, 4) },
+    { title: '☀️ تشكيلة الظهيرة والعصر (01:00 م - 05:00 م)', slots: evaluatedSlots.slice(4, 8) },
+    { title: '🌅 تشكيلة المغرب وبداية المساء (05:00 م - 09:00 م)', slots: evaluatedSlots.slice(8, 12) },
+    { title: '💡 تشكيلة سهرة الكشافات الليلية (09:00 م - 01:00 ص)', slots: evaluatedSlots.slice(12, 16) }
+  ];
+
+  let html = '';
+
+  lines.forEach((line) => {
+    html += `
+      <div class="tactical-line-label">${line.title}</div>
+      <div class="tactical-line-row">
+    `;
+
+    line.slots.forEach((item) => {
+      const s = item.slot;
+      const time12H = formatTime12H(s.startTime);
+      const range12H = formatSlotRange12H(s.startTime, s.endTime);
+
+      let tooltipCustomer = '';
+      if (item.matchedBooking) {
+        tooltipCustomer = `👤 ${escapeHtml(item.matchedBooking.customerName || 'محجوز')}`;
+      } else {
+        tooltipCustomer = `⚡ ${formatCurrency(item.pricing.total)} (انقر للحجز)`;
+      }
+
+      const clickHandler = item.isClickable 
+        ? `onclick="window.handleSlotBookClick('${selectedDateKey}', '${s.startTime}')"` 
+        : `onclick="window.handleCircleInfoClick('${time12H}', '${item.statusLabel}', '${item.matchedBooking ? escapeHtml(item.matchedBooking.customerName) : ''}')"`;
+
+      html += `
+        <div class="player-slot-circle ${item.nodeClass}" ${clickHandler} title="${range12H} - ${item.statusLabel}">
+          <span class="node-icon">⚽</span>
+          <span class="node-time-12h">${time12H}</span>
+          <span class="node-subtext">${item.status === 'available' ? 'متاح' : item.statusLabel}</span>
+
+          <div class="node-tooltip">
+            <strong style="color: #38bdf8; font-size: 0.85rem;">${range12H}</strong>
+            <span style="font-weight: 700;">${item.statusLabel}</span>
+            <span style="color: #94a3b8; font-size: 0.75rem;">${tooltipCustomer}</span>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+/**
+ * Renders Standard Cards Grid with 12-Hour format
+ */
+function renderCardsGrid(evaluatedSlots) {
+  const container = document.getElementById('slotsContainer');
+  if (!container) return;
+
+  let html = '';
+
+  evaluatedSlots.forEach((item) => {
+    const slot = item.slot;
+    const range12H = formatSlotRange12H(slot.startTime, slot.endTime);
+    const start12H = formatTime12H(slot.startTime);
+    const end12H = formatTime12H(slot.endTime);
+
+    const periodTag = item.isNight 
+      ? '<span class="slot-period-tag period-night">🌙 ليلي</span>' 
+      : '<span class="slot-period-tag period-day">☀️ نهاري</span>';
+
+    const cardId = `slot-card-${item.index}`;
 
     html += `
-      <div id="${cardId}" class="slot-card ${statusClass}" data-start="${slot.startTime}" data-date="${selectedDateKey}">
+      <div id="${cardId}" class="slot-card ${item.statusClass}" data-start="${slot.startTime}" data-date="${selectedDateKey}">
         <div class="slot-top-row">
-          <div class="slot-time">
-            <span>${slot.startTime}</span>
-            <span style="color: var(--text-muted); font-size: 0.9rem;">إلى</span>
-            <span>${slot.endTime}</span>
+          <div class="slot-time" style="font-size: 1.15rem; font-weight: 800; direction: rtl;">
+            <span>${start12H}</span>
+            <span style="color: var(--text-muted); font-size: 0.85rem; margin: 0 4px;">إلى</span>
+            <span>${end12H}</span>
           </div>
           ${periodTag}
         </div>
 
         <div class="slot-details-body">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="slot-status-pill ${pillClass}">
-              ● ${statusLabel}
+            <span class="slot-status-pill ${item.pillClass}">
+              ● ${item.statusLabel}
             </span>
             <span class="slot-price-info">
-              ${formatCurrency(pricing.total)} / ساعة
+              ${formatCurrency(item.pricing.total)} / ساعة
             </span>
           </div>
 
-          ${matchedBooking ? `
+          ${item.matchedBooking ? `
             <div class="customer-tag">
-              👤 ${escapeHtml(matchedBooking.customerName || 'محجوز')}
+              👤 ${escapeHtml(item.matchedBooking.customerName || 'محجوز')}
             </div>
-            ${matchedBooking.notes ? `<div style="font-size: 0.78rem; color: #94a3b8;">📝 ${escapeHtml(matchedBooking.notes)}</div>` : ''}
+            ${item.matchedBooking.notes ? `<div style="font-size: 0.78rem; color: #94a3b8;">📝 ${escapeHtml(item.matchedBooking.notes)}</div>` : ''}
           ` : `
             <div style="font-size: 0.8rem; color: #94a3b8;">
               الملعب متاح ومضاء وجاهز للحجز
@@ -198,13 +292,13 @@ export function renderSlots() {
         </div>
 
         <div class="slot-action-area">
-          ${isClickable ? `
+          ${item.isClickable ? `
             <button class="btn-book-slot" onclick="window.handleSlotBookClick('${selectedDateKey}', '${slot.startTime}')">
-              <span>⚡ احجز الآن</span>
+              <span>⚡ احجز الآن (${start12H})</span>
             </button>
           ` : `
-            <div style="text-align: center; font-size: 0.82rem; color: #94a3b8; padding: 6px 0;">
-              ${statusLabel}
+            <div style="text-align: center; font-size: 0.85rem; color: #94a3b8; padding: 6px 0; font-weight: 700;">
+              ${item.statusLabel}
             </div>
           `}
         </div>
@@ -238,7 +332,7 @@ function evaluateActiveSpotlightMatch() {
     spotlightCard.classList.add('visible');
 
     document.getElementById('activeCustomerName').textContent = ongoingBooking.customerName || 'مباراة نشطة';
-    document.getElementById('activeMatchTime').textContent = `${ongoingBooking.startTime} إلى ${ongoingBooking.endTime}`;
+    document.getElementById('activeMatchTime').textContent = formatSlotRange12H(ongoingBooking.startTime, ongoingBooking.endTime);
     document.getElementById('activeMatchPeriod').textContent = ongoingBooking.period || 'ملعب خماسي';
 
     // Register countdown engine
@@ -287,4 +381,12 @@ function escapeHtml(text) {
 // Global click handler exposed for slot cards
 window.handleSlotBookClick = function(dateKey, startTime) {
   openBookingModal(dateKey, startTime, 1);
+};
+
+// Global click handler for non-available circles on tactical pitch
+window.handleCircleInfoClick = function(timeStr, statusLabel, customerName) {
+  const detail = customerName ? ` (${customerName})` : '';
+  const { showToast } = import('./utils.js').then(u => {
+    u.showToast(`موعد الساعة ${timeStr}: ${statusLabel}${detail}`, statusLabel.includes('محجوز') ? 'error' : 'info');
+  });
 };

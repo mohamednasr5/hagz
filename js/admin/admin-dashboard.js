@@ -23,6 +23,8 @@ import {
   formatEgyptDateKey, 
   formatCurrency, 
   formatArabicFullDate, 
+  formatTime12H,
+  formatSlotRange12H,
   calculateBookingPrice, 
   timeStringToMinutes, 
   showToast 
@@ -253,7 +255,7 @@ function renderBookingsTable() {
       <tr>
         <td style="font-weight: 800; color: #fff;">${escapeHtml(b.customerName)}</td>
         <td dir="ltr" style="text-align: right; color: #94a3b8;">${escapeHtml(b.customerPhone || '-')}</td>
-        <td>${b.startTime} - ${b.endTime}</td>
+        <td style="direction: rtl; font-weight: 700;">${formatSlotRange12H(b.startTime, b.endTime)}</td>
         <td>${(b.durationMinutes || 60) / 60} س</td>
         <td>${statusBadge}</td>
         <td style="font-weight: 800;">${formatCurrency(b.totalPrice)}</td>
@@ -292,8 +294,8 @@ function renderPendingApprovals() {
     <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center;">
       <div>
         <div style="font-weight: 800; font-size: 1.05rem; color: #fff;">👤 ${escapeHtml(b.customerName)}</div>
-        <div style="font-size: 0.85rem; color: #94a3b8;">
-          ⏰ ${b.startTime} إلى ${b.endTime} • القيمة: ${formatCurrency(b.totalPrice)} • هاتف: ${escapeHtml(b.customerPhone)}
+        <div style="font-size: 0.85rem; color: #94a3b8; direction: rtl;">
+          ⏰ ${formatSlotRange12H(b.startTime, b.endTime)} • القيمة: ${formatCurrency(b.totalPrice)} • هاتف: ${escapeHtml(b.customerPhone)}
         </div>
         ${b.notes ? `<div style="font-size: 0.8rem; color: #fbbf24; margin-top: 4px;">📝 ${escapeHtml(b.notes)}</div>` : ''}
       </div>

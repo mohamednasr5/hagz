@@ -461,8 +461,25 @@
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="form-group">
-              <label>وقت البداية:</label>
-              <input type="time" id="manualStartTime" class="form-input" required>
+              <label>وقت البداية (12 ساعة):</label>
+              <select id="manualStartTime" class="form-select" required>
+                <option value="09:00">09:00 ص</option>
+                <option value="10:00">10:00 ص</option>
+                <option value="11:00">11:00 ص</option>
+                <option value="12:00">12:00 م</option>
+                <option value="13:00">01:00 م</option>
+                <option value="14:00">02:00 م</option>
+                <option value="15:00">03:00 م</option>
+                <option value="16:00">04:00 م</option>
+                <option value="17:00">05:00 م</option>
+                <option value="18:00">06:00 م (كشافات)</option>
+                <option value="19:00">07:00 م (كشافات)</option>
+                <option value="20:00">08:00 م (كشافات)</option>
+                <option value="21:00">09:00 م (كشافات)</option>
+                <option value="22:00">10:00 م (كشافات)</option>
+                <option value="23:00">11:00 م (كشافات)</option>
+                <option value="00:00">12:00 ص (منتصف الليل)</option>
+              </select>
             </div>
             <div class="form-group">
               <label>المدة (ساعات):</label>

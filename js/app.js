@@ -33,6 +33,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
+ * Switch view between Tactical Pitch Formation and Cards List
+ */
+window.switchScheduleView = function(view) {
+  const pitchContainer = document.getElementById('pitchFormationContainer');
+  const cardsContainer = document.getElementById('slotsContainer');
+  const pitchBtn = document.getElementById('viewTogglePitchBtn');
+  const cardsBtn = document.getElementById('viewToggleCardsBtn');
+
+  if (view === 'pitch') {
+    if (pitchContainer) pitchContainer.style.display = 'block';
+    if (cardsContainer) cardsContainer.style.display = 'none';
+    if (pitchBtn) pitchBtn.classList.add('active');
+    if (cardsBtn) cardsBtn.classList.remove('active');
+  } else {
+    if (pitchContainer) pitchContainer.style.display = 'none';
+    if (cardsContainer) cardsContainer.style.display = 'grid';
+    if (cardsBtn) cardsBtn.classList.add('active');
+    if (pitchBtn) pitchBtn.classList.remove('active');
+  }
+};
+
+/**
  * Live Egypt Digital Clock
  */
 function initLiveClock() {

@@ -163,24 +163,52 @@
       <div class="status-legend">
         <div class="legend-item">
           <span class="legend-color legend-green"></span>
-          <span>قابل للحجز (متاح)</span>
+          <span>دائرة خضراء: قابل للحجز (متاح)</span>
         </div>
         <div class="legend-item">
           <span class="legend-color legend-red"></span>
-          <span>محجوز (مؤكد)</span>
+          <span>دائرة حمراء: محجوز (مؤكد)</span>
         </div>
         <div class="legend-item">
           <span class="legend-color legend-yellow"></span>
-          <span>في انتظار التأكيد</span>
+          <span>دائرة صفراء: في انتظار التأكيد</span>
         </div>
         <div class="legend-item">
           <span class="legend-color legend-orange"></span>
-          <span>انتهى الحجز</span>
+          <span>دائرة برتقالية: انتهى الحجز</span>
         </div>
       </div>
 
-      <!-- Realtime Schedule Slots Grid -->
-      <div id="slotsContainer" class="slots-grid">
+      <!-- View Switcher Tabs -->
+      <div class="formation-view-toggle">
+        <button id="viewTogglePitchBtn" class="view-toggle-btn active" onclick="window.switchScheduleView('pitch')">
+          ⚽ تشكيلة الملعب التفاعلية
+        </button>
+        <button id="viewToggleCardsBtn" class="view-toggle-btn" onclick="window.switchScheduleView('cards')">
+          📋 جدول القوائم والتفاصيل
+        </button>
+      </div>
+
+      <!-- 1. TACTICAL FOOTBALL PITCH FORMATION (دوائر تشكيلة اللاعبين على أرضية الملعب) -->
+      <div id="pitchFormationContainer" class="pitch-formation-section">
+        <div class="tactical-pitch-board">
+          <div class="pitch-marking-halfway"></div>
+          <div class="pitch-marking-center-circle"></div>
+          <div class="pitch-marking-center-spot"></div>
+          <div class="pitch-marking-top-box"></div>
+          <div class="pitch-marking-bottom-box"></div>
+
+          <div id="tacticalPitchFormation" class="tactical-formation-container">
+            <!-- Dynamic Circles injected by schedule.js -->
+          </div>
+        </div>
+        <div style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">
+          💡 انقر على أي <strong>دائرة خضراء</strong> على أرضية الملعب لبدء الحجز الفوري لتلك الساعة (نظام 12 ساعة)
+        </div>
+      </div>
+
+      <!-- 2. Realtime Schedule Slots Grid (Cards View) -->
+      <div id="slotsContainer" class="slots-grid" style="display: none;">
         <!-- Slots injected dynamically by schedule.js -->
       </div>
     </section>
@@ -234,7 +262,7 @@
   <div id="bookingModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h2>⚡ حجز موعد جديد في الملعب</h2>
+        <h2>⚡ حجز موعد جديد في الملعب (نظام 12 ساعة)</h2>
         <button id="closeBookingModalBtn" class="modal-close-btn">&times;</button>
       </div>
 
@@ -247,10 +275,27 @@
             <div id="bookingDateDisplay" style="font-weight: 800; color: var(--accent-green); font-size: 1.05rem;">--</div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
             <div class="form-group">
-              <label for="bookingStartTime">وقت البداية:</label>
-              <input type="time" id="bookingStartTime" class="form-input" required>
+              <label for="bookingStartTime">وقت البداية (12 ساعة):</label>
+              <select id="bookingStartTime" class="form-select" required>
+                <option value="09:00">09:00 ص (صباحاً)</option>
+                <option value="10:00">10:00 ص (صباحاً)</option>
+                <option value="11:00">11:00 ص (صباحاً)</option>
+                <option value="12:00">12:00 م (ظهراً)</option>
+                <option value="13:00">01:00 م (ظهراً)</option>
+                <option value="14:00">02:00 م (عصراً)</option>
+                <option value="15:00">03:00 م (عصراً)</option>
+                <option value="16:00">04:00 م (عصراً)</option>
+                <option value="17:00">05:00 م (مساءً)</option>
+                <option value="18:00">06:00 م (مساءً - كشافات)</option>
+                <option value="19:00">07:00 م (مساءً - كشافات)</option>
+                <option value="20:00">08:00 م (مساءً - كشافات)</option>
+                <option value="21:00">09:00 م (ليلاً - كشافات)</option>
+                <option value="22:00">10:00 م (ليلاً - كشافات)</option>
+                <option value="23:00">11:00 م (ليلاً - كشافات)</option>
+                <option value="00:00">12:00 ص (منتصف الليل)</option>
+              </select>
             </div>
             <div class="form-group">
               <label for="bookingDuration">المدة (ساعات):</label>

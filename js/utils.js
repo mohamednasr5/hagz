@@ -59,6 +59,27 @@ export function formatCurrency(amount) {
 }
 
 /**
+ * Converts "17:00" to "5:00 م" (12-hour Arabic format)
+ */
+export function formatTime12H(time24) {
+  if (!time24) return '';
+  const [hStr, mStr] = time24.split(':');
+  let h = parseInt(hStr, 10);
+  const m = mStr || '00';
+  const period = h >= 12 ? 'م' : 'ص';
+  h = h % 12;
+  if (h === 0) h = 12;
+  return `${h}:${m} ${period}`;
+}
+
+/**
+ * Converts start and end 24H times to 12H range "05:00 م - 06:00 م"
+ */
+export function formatSlotRange12H(startTime, endTime) {
+  return `${formatTime12H(startTime)} - ${formatTime12H(endTime)}`;
+}
+
+/**
  * Converts 24-hour time "14:00" or 14 to Arabic 12-hour display "02:00 م"
  */
 export function formatTimeArabic(hour, minute = 0) {

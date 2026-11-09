@@ -9,6 +9,8 @@ import {
   formatEgyptDateKey, 
   getArabicDayName, 
   formatArabicFullDate, 
+  formatTime12H,
+  formatSlotRange12H,
   timeStringToMinutes 
 } from './utils.js';
 import { countdownEngine } from './countdown.js';
@@ -103,7 +105,7 @@ function updateLiveDisplay() {
 
     title.textContent = currentOngoing.customerName || 'مباراة مباشرة';
     period.textContent = `الفترة: ${currentOngoing.period || 'ملعب خماسي'} • كشافات الملعب مفعلة`;
-    startEnd.textContent = `من ${currentOngoing.startTime} إلى ${currentOngoing.endTime}`;
+    startEnd.textContent = `المباراة: ${formatSlotRange12H(currentOngoing.startTime, currentOngoing.endTime)}`;
 
     const isNight = (currentOngoing.period || '').includes('ليل');
     lighting.textContent = isNight ? '💡 كشافات الملعب: تشغيل كامل' : '☀️ إضاءة طبيعية: نهارية';
@@ -160,8 +162,8 @@ function updateLiveDisplay() {
       nextMatchEl.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <strong style="color: #38bdf8; font-size: 1.25rem;">${escapeHtml(nextMatch.customerName)}</strong>
-          <span style="background: rgba(56, 189, 248, 0.2); padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem;">
-            ${nextMatch.startTime}
+          <span style="background: rgba(56, 189, 248, 0.2); padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; direction: rtl;">
+            ${formatTime12H(nextMatch.startTime)}
           </span>
         </div>
         <div style="color: #94a3b8; font-size: 0.95rem;">
@@ -196,7 +198,7 @@ function updateLiveDisplay() {
         return `
           <div class="tv-upcoming-item" style="${isCurrent ? 'border-color: #ef4444;' : ''}">
             <div>
-              <div class="tv-upcoming-time">${b.startTime} - ${b.endTime}</div>
+              <div class="tv-upcoming-time" style="direction: rtl;">${formatSlotRange12H(b.startTime, b.endTime)}</div>
               <div style="color: #cbd5e1; font-size: 0.95rem; font-weight: 700; margin-top: 2px;">
                 ${escapeHtml(b.customerName)}
               </div>
