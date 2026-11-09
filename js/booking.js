@@ -50,6 +50,7 @@ export function initBookingModal() {
   const startTimeInput = document.getElementById('bookingStartTime');
 
   if (!modalOverlay) return;
+  populateTimeSelect(startTimeInput, '09:00');
 
   const closeModal = () => {
     modalOverlay.classList.remove('active');
@@ -224,7 +225,7 @@ async function handleBookingSubmit(e) {
     }
 
     const startMinutes = timeStringToMinutes(startTime);
-    const endMinutes = startMinutes + duration * 60;
+    const durationMinutes = Math.round(duration * 60);\n    if (!Number.isFinite(durationMinutes) || durationMinutes < 30 || durationMinutes % 30 !== 0) {\n      showToast('مدة الحجز يجب أن تكون 30 دقيقة على الأقل وبمضاعفات نصف ساعة.', 'error');\n      return;\n    }\n    const endMinutes = startMinutes + durationMinutes;
     const breakdown = calculateBookingPrice(startTime, duration, currentSettings);
 
     // Compute exact startTimestamp and endTimestamp
@@ -232,7 +233,7 @@ async function handleBookingSubmit(e) {
     const [sh, sm] = startTime.split(':').map(Number);
     const startDateObj = new Date(y, m - 1, d, sh, sm, 0);
     const startTimestamp = startDateObj.getTime();
-    const endTimestamp = startTimestamp + (duration * 60 * 60 * 1000);
+    const endTimestamp = startTimestamp + (durationMinutes * 60 * 1000);
 
     // End time string
     const endH = Math.floor(endMinutes / 60) % 24;
@@ -278,7 +279,7 @@ async function handleBookingSubmit(e) {
       date,
       startTime,
       endTime,
-      durationMinutes: duration * 60,
+      durationMinutes,
       period: breakdown.periodLabel,
       startTimestamp,
       endTimestamp,
