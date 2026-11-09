@@ -41,7 +41,7 @@
         <!-- Live Egypt Digital Clock -->
         <div class="egypt-clock-badge" title="توقيت جمهورية مصر العربية">
           <span class="clock-pulse-dot"></span>
-          <span id="liveEgyptClock">00:00:00 ص</span>
+          <span id="liveEgyptClock">12:00:00 ص</span>
         </div>
 
         <!-- Stadium TV Display Link -->
@@ -75,16 +75,17 @@
     </div>
 
     <!-- Hero Stadium Section -->
-    <section class="hero-stadium" id="section-home">
+    <section class="hero-stadium premium-hero" id="section-home">
       <div class="hero-content">
         <div class="hero-tag">
           ⚽ نجيل صناعي تركي من الجيل الجديد • إضاءة ليلية عالية الكفاءة
         </div>
+        <div class="hero-eyebrow">AHMADIAH PITCH • SMART BOOKING</div>
         <h2 class="hero-title">
-          احجز موعدك الآن في أفضل ملعب خماسي بمركز شباب الأحمدية
+          تجربة حجز ذكية… وموعدك على أرض الملعب يبدأ من هنا
         </h2>
         <p class="hero-desc">
-          نظام حجز فوري لحظي بدقة الثانية، مع تسعير تلقائي عادل للفترات النهارية والليلية، ومتابعة حية للمباريات والوقت المتبقي.
+          اختر بداية الموعد بالدقيقة، وحدد المدة التي تناسب فريقك. النظام يحسب السعر ويتحقق من تعارض الحجوزات لحظياً.
         </p>
 
         <div class="hero-badges-row">
@@ -203,7 +204,7 @@
           </div>
         </div>
         <div style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">
-          💡 انقر على أي <strong>دائرة خضراء</strong> على أرضية الملعب لبدء الحجز الفوري لتلك الساعة (نظام 12 ساعة)
+          💡 اختر الموعد المتاح من أرضية الملعب. الأوقات بفواصل 30 دقيقة وتُعرض بنظام 12 ساعة.
         </div>
       </div>
 
@@ -278,33 +279,12 @@
           <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
             <div class="form-group">
               <label for="bookingStartTime">وقت البداية (12 ساعة):</label>
-              <select id="bookingStartTime" class="form-select" required>
-                <option value="09:00">09:00 ص (صباحاً)</option>
-                <option value="10:00">10:00 ص (صباحاً)</option>
-                <option value="11:00">11:00 ص (صباحاً)</option>
-                <option value="12:00">12:00 م (ظهراً)</option>
-                <option value="13:00">01:00 م (ظهراً)</option>
-                <option value="14:00">02:00 م (عصراً)</option>
-                <option value="15:00">03:00 م (عصراً)</option>
-                <option value="16:00">04:00 م (عصراً)</option>
-                <option value="17:00">05:00 م (مساءً)</option>
-                <option value="18:00">06:00 م (مساءً - كشافات)</option>
-                <option value="19:00">07:00 م (مساءً - كشافات)</option>
-                <option value="20:00">08:00 م (مساءً - كشافات)</option>
-                <option value="21:00">09:00 م (ليلاً - كشافات)</option>
-                <option value="22:00">10:00 م (ليلاً - كشافات)</option>
-                <option value="23:00">11:00 م (ليلاً - كشافات)</option>
-                <option value="00:00">12:00 ص (منتصف الليل)</option>
-              </select>
+              <select id="bookingStartTime" class="form-select" required aria-label="وقت بداية الحجز"></select>
             </div>
             <div class="form-group">
               <label for="bookingDuration">المدة (ساعات):</label>
-              <select id="bookingDuration" class="form-select">
-                <option value="1">ساعة واحدة (60 دقيقة)</option>
-                <option value="1.5">ساعة ونصف (90 دقيقة)</option>
-                <option value="2">ساعتان (120 دقيقة)</option>
-                <option value="3">3 ساعات</option>
-              </select>
+              <input type="number" id="bookingDuration" class="form-input" min="0.5" max="12" step="0.5" value="1" inputmode="decimal" required>
+              <small class="field-hint">أدخل المدة بالساعات؛ يمكنك اختيار نصف ساعة أو 1.5 أو 2.5 ساعة، وهكذا.</small>
             </div>
           </div>
 

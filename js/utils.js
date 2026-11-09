@@ -79,6 +79,27 @@ export function formatSlotRange12H(startTime, endTime) {
   return `${formatTime12H(startTime)} - ${formatTime12H(endTime)}`;
 }
 
+/** Create 30-minute choices; values stay canonical HH:mm while labels use 12-hour time. */
+export function buildTimeOptions(startHour = 9, endHour = 24, stepMinutes = 30) {
+  const options = [];
+  for (let minute = startHour * 60; minute <= endHour * 60; minute += stepMinutes) {
+    const normalized = minute % 1440;
+    const hour = Math.floor(normalized / 60);
+    const mins = normalized % 60;
+    const value = `${String(hour).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+    options.push({ value, label: formatTime12H(value) });
+  }
+  return options;
+}
+
+export function populateTimeSelect(select, selectedValue = '09:00') {
+  if (!select) return;
+  select.innerHTML = buildTimeOptions().map(({ value, label }) =>
+    `<option value="${value}">${label}</option>`
+  ).join('');
+  select.value = selectedValue;
+  if (select.value !== selectedValue) select.selectedIndex = 0;
+}
 /**
  * Converts 24-hour time "14:00" or 14 to Arabic 12-hour display "02:00 م"
  */

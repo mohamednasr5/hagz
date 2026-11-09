@@ -186,3 +186,25 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Premium depth, metallic sheen and 3D entrance */
+@keyframes premiumDepthPulse {
+  0%,100% { filter: drop-shadow(0 8px 20px rgba(44,214,190,.08)); }
+  50% { filter: drop-shadow(0 15px 32px rgba(44,214,190,.22)); }
+}
+@keyframes premiumCardFloat {
+  0%,100% { transform: translateY(0) rotateX(0deg); }
+  50% { transform: translateY(-6px) rotateX(1deg); }
+}
+
+
+/* ── Premium depth and 3D interaction ── */
+@keyframes premiumDepthPulse {
+  0%,100% { filter: drop-shadow(0 8px 20px rgba(44,214,190,.08)); }
+  50% { filter: drop-shadow(0 15px 32px rgba(44,214,190,.22)); }
+}
+@keyframes premiumCardFloat {
+  0%,100% { transform: translateY(0) rotateX(0deg); }
+  50% { transform: translateY(-6px) rotateX(1deg); }
+}

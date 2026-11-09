@@ -26,7 +26,8 @@ import {
   formatTime12H,
   formatSlotRange12H,
   calculateBookingPrice, 
-  timeStringToMinutes, 
+  timeStringToMinutes,
+  populateTimeSelect,
   showToast 
 } from '../utils.js';
 import { calculateDailyFinances, renderDailyFinancialReport } from './finance.js';
@@ -316,6 +317,8 @@ function initModals() {
   const manualModal = document.getElementById('manualBookingModal');
   const closeManualBtn = document.getElementById('closeManualBookingModal');
   const manualForm = document.getElementById('manualBookingForm');
+  const manualStartInput = document.getElementById('manualStartTime');
+  populateTimeSelect(manualStartInput, '09:00');
 
   if (btnNewBooking && manualModal) {
     btnNewBooking.addEventListener('click', () => {
@@ -342,14 +345,29 @@ function initModals() {
 
         const [sh, sm] = startTime.split(':').map(Number);
         const startMin = sh * 60 + sm;
-        const endMin = startMin + duration * 60;
+        const durationMinutes = Math.round(duration * 60);
+        if (!name || !Number.isFinite(durationMinutes) || durationMinutes < 30 || durationMinutes % 30 !== 0) {
+          showToast('أدخل اسم العميل ومدة صحيحة بمضاعفات 30 دقيقة.', 'error');
+          return;
+        }
+        const endMin = startMin + durationMinutes;
+        const conflict = Object.entries(dayBookings).some(([id, b]) => {
+          if (b.status === 'cancelled') return false;
+          const bStart = timeStringToMinutes(b.startTime);
+          const bEnd = bStart + (Number(b.durationMinutes) || 60);
+          return startMin < bEnd && endMin > bStart;
+        });
+        if (conflict) {
+          showToast('لا يمكن إنشاء الحجز؛ يوجد حجز آخر يتداخل مع هذه الفترة.', 'error');
+          return;
+        }
         const endH = Math.floor(endMin / 60) % 24;
         const endM = endMin % 60;
         const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
 
         const [y, m, d] = selectedDateKey.split('-').map(Number);
         const startTimestamp = new Date(y, m - 1, d, sh, sm, 0).getTime();
-        const endTimestamp = startTimestamp + (duration * 60 * 60 * 1000);
+        const endTimestamp = startTimestamp + (durationMinutes * 60 * 1000);
 
         const newRef = push(dbRefs.bookings(selectedDateKey));
         await set(newRef, {
@@ -359,7 +377,7 @@ function initModals() {
           date: selectedDateKey,
           startTime,
           endTime,
-          durationMinutes: duration * 60,
+          durationMinutes,
           period: 'حجز يدوي بواسطة الإدارة',
           startTimestamp,
           endTimestamp,

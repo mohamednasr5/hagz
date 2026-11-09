@@ -27,26 +27,26 @@ document.addEventListener('DOMContentLoaded', () => {
 function initClock() {
   const clockEl = document.getElementById('tvDigitalClock');
   const dateEl = document.getElementById('tvDateDisplay');
-
   const update = () => {
-    const now = getEgyptNow();
-    let rawH = now.getHours();
-    const period = rawH >= 12 ? 'م' : 'ص';
-    let h12 = rawH % 12;
-    if (h12 === 0) h12 = 12;
-
-    const h = String(h12).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-
-    if (clockEl) clockEl.textContent = `${h}:${m}:${s} ${period}`;
-    if (dateEl) dateEl.textContent = `${getArabicDayName(now)} - ${formatArabicFullDate(now)}`;
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Cairo',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    }).formatToParts(now).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    const rawHour = Number(parts.hour);
+    const hour12 = String(rawHour % 12 || 12).padStart(2, '0');
+    const period = rawHour >= 12 ? 'م' : 'ص';
+    if (clockEl) clockEl.textContent = `${hour12}:${parts.minute}:${parts.second} ${period}`;
+    if (dateEl) dateEl.textContent = new Intl.DateTimeFormat('ar-EG', {
+      timeZone: 'Africa/Cairo', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    }).format(now);
   };
-
   update();
   setInterval(update, 1000);
 }
-
 function initSettings() {
   onValue(dbRefs.settings(), (snap) => {
     const val = snap.val();
