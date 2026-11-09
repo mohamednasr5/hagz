@@ -15,7 +15,8 @@ import {
   calculateBookingPrice, 
   formatCurrency, 
   showToast, 
-  timeStringToMinutes 
+  timeStringToMinutes,
+  populateTimeSelect
 } from './utils.js';
 import { soundFX } from './audio-fx.js';
 
