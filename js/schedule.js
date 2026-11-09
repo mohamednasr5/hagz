@@ -67,21 +67,17 @@ export function loadScheduleForDate(dateKey) {
 function getDaySlotHours() {
   const hours = [];
   // Standard operating hours: from 09:00 to 01:00 AM (next day)
-  for (let h = 9; h <= 23; h++) {
+  for (let minute = 9 * 60; minute <= 24 * 60; minute += 30) {
+    const start = minute % 1440;
+    const end = (minute + 30) % 1440;
+    const toTime = value => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
     hours.push({
-      startHour: h,
-      endHour: (h + 1) % 24,
-      startTime: `${String(h).padStart(2, '0')}:00`,
-      endTime: `${String((h + 1) % 24).padStart(2, '0')}:00`
+      startHour: Math.floor(start / 60),
+      endHour: Math.floor(end / 60),
+      startTime: toTime(start),
+      endTime: toTime(end)
     });
   }
-  // 00:00 to 01:00 AM
-  hours.push({
-    startHour: 0,
-    endHour: 1,
-    startTime: '00:00',
-    endTime: '01:00'
-  });
   return hours;
 }
 
@@ -160,7 +156,7 @@ export function renderSlots() {
     let pillClass = 'status-pill-green';
     let isClickable = true;
 
-    const pricing = calculateBookingPrice(slot.startTime, 1, settings);
+    const pricing = calculateBookingPrice(slot.startTime, 0.5, settings);
     const isNight = pricing.nightHours > 0;
 
     // ── PAST DATE: everything is expired and unclickable ──────────────────
