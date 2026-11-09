@@ -63,15 +63,18 @@ function initLiveClock() {
   const clockEl = document.getElementById('liveEgyptClock');
   const updateClock = () => {
     if (!clockEl) return;
-    const now = getEgyptNow();
-    let rawH = now.getHours();
-    const period = rawH >= 12 ? 'م' : 'ص';
-    let h12 = rawH % 12;
-    if (h12 === 0) h12 = 12;
-
-    const hours = String(h12).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit',
+      second: '2-digit', hour12: false
+    }).formatToParts(new Date()).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    const rawHour = Number(parts.hour);
+    const period = rawHour >= 12 ? 'م' : 'ص';
+    const hours = String(rawHour % 12 || 12).padStart(2, '0');
+    const minutes = parts.minute;
+    const seconds = parts.second;
     clockEl.textContent = `${hours}:${minutes}:${seconds} ${period}`;
   };
 
