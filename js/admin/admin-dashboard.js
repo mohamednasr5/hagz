@@ -11,7 +11,8 @@ import {
   update, 
   remove, 
   push, 
-  get 
+  get,
+  runTransaction
 } from '../firebase-config.js';
 import { 
   isAdminAuthenticated, 
@@ -197,9 +198,9 @@ async function createLiveBooking(mode) {
     }
 
     const settingsSnapshot = await get(dbRefs.settings());
-    const pricing = calculateBookingPrice(startTime, minutes / 60, settingsSnapshot.val() || {});
+    const pricing = calculateBookingPrice(startTime, minutes / 60, settingsSnapshot.val() || { dayPrice: 120, nightPrice: 180, dayStart: '06:00', nightStart: '18:00' });
     const newRef = push(dbRefs.bookings(dateKey));
-    await set(newRef, {
+    const bookingData = {
       bookingId: newRef.key,
       customerName,
       customerPhone: 'غير مسجل',
@@ -220,7 +221,19 @@ async function createLiveBooking(mode) {
       createdAt: now,
       updatedAt: now,
       confirmedAt: now
+    };
+    let latestConflict = null;
+    const transaction = await runTransaction(dbRefs.bookings(dateKey), current => {
+      const latestBookings = current || {};
+      latestConflict = findBookingConflict(startMinute, startMinute + minutes, latestBookings);
+      if (latestConflict) return;
+      latestBookings[newRef.key] = bookingData;
+      return latestBookings;
     });
+    if (!transaction.committed) {
+      showToast(latestConflict ? describeBookingConflict(latestConflict) : 'لم يتم اعتماد الحجز. حاول مرة أخرى.', 'error');
+      return;
+    }
 
     document.getElementById('liveBookingModal')?.classList.remove('active');
     if (dateKey === selectedDateKey) updateDashboardUI();
