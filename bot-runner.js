@@ -12,13 +12,16 @@ const BOT_TOKEN = '9099414918:AAEw4nqGbWP4pixVcI05olGLTag5H42vkhE';
 const FIREBASE_DB_BASE = 'https://hagz-a49fa-default-rtdb.firebaseio.com';
 
 let lastUpdateId = 0;
-let knownConfirmedBookings = new Set();
-let isFirstRun = true;
+// Track notified bookings: key = `${id}_${status}` to re-notify on status change
+const notifiedKeys = new Set();
+let botStartTimestamp = Date.now(); // Only notify bookings created AFTER bot starts
 
 console.log('----------------------------------------------------');
 console.log('🤖 بوت ملعب مركز شباب الأحمدية قيد التشغيل والجاهزية...');
 console.log('Bot Username: @AhmadiahPitchBot');
+console.log('وقت البدء:', new Date().toLocaleString('ar-EG', {timeZone:'Africa/Cairo'}));
 console.log('----------------------------------------------------');
+
 
 /**
  * Generic HTTPS JSON Request Helper
@@ -267,75 +270,141 @@ async function pollTelegramUpdates() {
 }
 
 /**
- * Watcher for new confirmed bookings to broadcast to Telegram subscribers
+ * Watcher for new confirmed/pending bookings to broadcast to Telegram subscribers
+ * Runs every 10 seconds and checks today + tomorrow
  */
 async function checkBookingNotifications() {
   try {
     const todayKey = getEgyptDateKey();
-    const bookingsData = await request(`${FIREBASE_DB_BASE}/bookings/${todayKey}.json`) || {};
+
+    // Build list of dates to check: today + tomorrow (for bookings made now that start tomorrow)
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrowKey = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Cairo',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(tomorrowDate);
+
+    const datesToCheck = [todayKey, tomorrowKey];
+
+    // Get subscribers once
     const subscribersData = await request(`${FIREBASE_DB_BASE}/telegramSubscribers.json`) || {};
     const subscriberIds = Object.keys(subscribersData);
 
     const now = Date.now();
 
-    for (const [id, b] of Object.entries(bookingsData)) {
-      if (b.status === 'confirmed') {
-        // If this confirmed booking is new and not yet broadcast
-        if (!knownConfirmedBookings.has(id)) {
-          knownConfirmedBookings.add(id);
+    for (const dateKey of datesToCheck) {
+      let bookingsData;
+      try {
+        bookingsData = await request(`${FIREBASE_DB_BASE}/bookings/${dateKey}.json`) || {};
+      } catch (e) {
+        continue;
+      }
+      if (typeof bookingsData !== 'object' || bookingsData === null) continue;
 
-          if (!isFirstRun && subscriberIds.length > 0) {
-            const start12 = to12H(b.startTime);
-            const end12 = to12H(b.endTime);
-            const msg = `
-⚽ <b>إشعار حجز مؤكد | ملعب الأحمدية</b>
+      for (const [id, b] of Object.entries(bookingsData)) {
+        if (!b || !b.status) continue;
 
-تم تأكيد حجز موعد جديد في الملعب!
-📅 <b>التاريخ:</b> ${todayKey}
-⏰ <b>الوقت:</b> ${start12} إلى ${end12}
+        // ── New Confirmed Booking Notification ───────────────────────────────
+        if (b.status === 'confirmed') {
+          const confirmedKey = `${id}_confirmed`;
+          if (!notifiedKeys.has(confirmedKey)) {
+            notifiedKeys.add(confirmedKey);
+
+            // Only broadcast if booking was confirmed AFTER the bot started
+            const bookingTs = b.confirmedAt || b.createdAt || 0;
+            if (subscriberIds.length > 0 && bookingTs >= botStartTimestamp) {
+              const start12 = to12H(b.startTime);
+              const end12   = to12H(b.endTime);
+              const msg = `
+⚽ <b>✅ حجز مؤكد جديد | ملعب الأحمدية</b>
+
+تم تأكيد حجز موعد في الملعب!
+📅 <b>التاريخ:</b> ${dateKey}
+⏰ <b>الوقت:</b> ${start12} ← ${end12}
 👤 <b>الحاجز:</b> ${b.customerName || 'فريق رياضي'}
 🌙 <b>الفترة:</b> ${b.period || 'ملعب خماسي'}
+${b.phone ? `📞 <b>الهاتف:</b> ${b.phone}` : ''}
 
 📍 <i>مركز شباب الأحمدية - مركز المنزلة</i>
-            `;
-            for (const cId of subscriberIds) {
-              await sendTelegramMessage(cId, msg).catch(() => {});
+              `.trim();
+
+              console.log(`[Bot] Broadcasting confirmed booking ${id} to ${subscriberIds.length} subscribers`);
+              for (const cId of subscriberIds) {
+                await sendTelegramMessage(cId, msg).catch(() => {});
+              }
+            }
+          }
+
+          // ── Expiry Notification ─────────────────────────────────────────────
+          if (now >= b.endTimestamp && !b.expiredBroadcast) {
+            await request(
+              `${FIREBASE_DB_BASE}/bookings/${dateKey}/${id}.json`,
+              { method: 'PATCH' },
+              { expiredBroadcast: true }
+            ).catch(() => {});
+
+            if (subscriberIds.length > 0) {
+              const msg = `
+⏰ <b>انتهاء وقت المباراة | ملعب الأحمدية</b>
+
+انتهت فترة المباراة المسجلة:
+⏰ ${to12H(b.startTime)} ← ${to12H(b.endTime)}
+👤 ${b.customerName || 'فريق رياضي'}
+📅 ${dateKey}
+
+🟢 الملعب جاهز الآن للفريق القادم.
+              `.trim();
+
+              console.log(`[Bot] Broadcasting expiry for booking ${id}`);
+              for (const cId of subscriberIds) {
+                await sendTelegramMessage(cId, msg).catch(() => {});
+              }
             }
           }
         }
 
-        // Check if booking expired right now
-        if (now >= b.endTimestamp && !b.expiredBroadcast) {
-          b.expiredBroadcast = true;
-          await request(`${FIREBASE_DB_BASE}/bookings/${todayKey}/${id}.json`, { method: 'PATCH' }, { expiredBroadcast: true });
+        // ── New Pending Booking Notification (to alert admin) ────────────────
+        if (b.status === 'pending') {
+          const pendingKey = `${id}_pending`;
+          if (!notifiedKeys.has(pendingKey)) {
+            notifiedKeys.add(pendingKey);
 
-          if (subscriberIds.length > 0) {
-            const msg = `
-⏰ <b>تنبيه انتهاء وقت المباراة | ملعب الأحمدية</b>
+            const bookingTs = b.createdAt || 0;
+            if (subscriberIds.length > 0 && bookingTs >= botStartTimestamp) {
+              const start12 = to12H(b.startTime);
+              const end12   = to12H(b.endTime);
+              const msg = `
+📋 <b>⏳ طلب حجز جديد بانتظار التأكيد | ملعب الأحمدية</b>
 
-انتهت فترة المباراة:
-⏰ <b>الوقت:</b> ${to12H(b.startTime)} إلى ${to12H(b.endTime)}
+وصل طلب حجز جديد ويحتاج موافقة الإدارة:
+📅 <b>التاريخ:</b> ${dateKey}
+⏰ <b>الوقت:</b> ${start12} ← ${end12}
+👤 <b>الاسم:</b> ${b.customerName || 'غير محدد'}
+${b.phone ? `📞 <b>الهاتف:</b> ${b.phone}` : ''}
 
-الملعب جاهز الآن للمباراة القادمة.
-📍 <i>مركز شباب الأحمدية</i>
-            `;
-            for (const cId of subscriberIds) {
-              await sendTelegramMessage(cId, msg).catch(() => {});
+🔗 لتأكيده ادخل لوحة الإدارة:
+https://mohamednasr5.github.io/hagz/admin/
+              `.trim();
+
+              console.log(`[Bot] Broadcasting pending booking ${id} to ${subscriberIds.length} subscribers`);
+              for (const cId of subscriberIds) {
+                await sendTelegramMessage(cId, msg).catch(() => {});
+              }
             }
           }
         }
       }
     }
 
-    if (isFirstRun) isFirstRun = false;
-
   } catch (err) {
-    console.error('Error in booking notification watcher:', err.message);
+    console.error('[Bot] Error in booking notification watcher:', err.message);
   }
 
-  setTimeout(checkBookingNotifications, 15000);
+  setTimeout(checkBookingNotifications, 10000); // Check every 10 seconds
 }
 
 // Start bot
 pollTelegramUpdates();
 checkBookingNotifications();
+

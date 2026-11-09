@@ -439,6 +439,7 @@ window.handleApproveBooking = async function(bookingId) {
     await update(dbRefs.bookingItem(selectedDateKey, bookingId), {
       status: 'confirmed',
       approvedAt: Date.now(),
+      confirmedAt: Date.now(),
       updatedAt: Date.now()
     });
 

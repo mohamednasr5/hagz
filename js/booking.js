@@ -202,6 +202,7 @@ async function handleBookingSubmit(e) {
       bookingId: newBookingRef.key,
       customerName,
       customerPhone: customerPhone || 'غير مسجل',
+      phone: customerPhone || '',
       date,
       startTime,
       endTime,

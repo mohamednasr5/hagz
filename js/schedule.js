@@ -85,6 +85,41 @@ function getDaySlotHours() {
 }
 
 /**
+ * Determines if a given date string (YYYY-MM-DD) is in the past (before today in Cairo TZ)
+ */
+function isDateInPast(dateKey) {
+  const todayKey = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Cairo',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+  return dateKey < todayKey;
+}
+
+/**
+ * Determines if a given date string (YYYY-MM-DD) is today in Cairo TZ
+ */
+function isDateToday(dateKey) {
+  const todayKey = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Cairo',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+  return dateKey === todayKey;
+}
+
+/**
+ * Returns current Cairo time as minutes-since-midnight
+ */
+function getNowMinutesCairo() {
+  const cairoStr = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Africa/Cairo',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).format(new Date());
+  // cairoStr is e.g. "23:05" or "01:30"
+  const [h, m] = cairoStr.split(':').map(Number);
+  return h * 60 + m;
+}
+
+/**
  * Renders both the Tactical Football Pitch Formation and the Slots Grid
  */
 export function renderSlots() {
@@ -92,9 +127,15 @@ export function renderSlots() {
   const settings = getPitchSettings();
   const now = Date.now();
 
+  const pastDate   = isDateInPast(selectedDateKey);
+  const todayDate  = isDateToday(selectedDateKey);
+  const nowMinutes = getNowMinutesCairo();
+
   // Compute status for all slots
   const evaluatedSlots = slots.map((slot, index) => {
     const slotStartMin = timeStringToMinutes(slot.startTime);
+    // For midnight slot (00:00), treat as next-day 24*60 for comparison
+    const slotStartMinAdj = slotStartMin === 0 ? 24 * 60 : slotStartMin;
     let matchedBooking = null;
     let matchedBookingId = null;
 
@@ -120,6 +161,31 @@ export function renderSlots() {
 
     const pricing = calculateBookingPrice(slot.startTime, 1, settings);
     const isNight = pricing.nightHours > 0;
+
+    // ── PAST DATE: everything is expired and unclickable ──────────────────
+    if (pastDate && !matchedBooking) {
+      isClickable = false;
+      status = 'expired';
+      statusLabel = 'يوم منتهي';
+      statusClass = 'status-expired';
+      nodeClass = 'status-node-orange';
+      pillClass = 'status-pill-orange';
+      return { slot, index, status, statusLabel, statusClass, nodeClass, pillClass, isClickable, pricing, isNight, matchedBooking };
+    }
+
+    // ── TODAY: past time slots (time already gone) are expired/unclickable ──
+    if (todayDate && !matchedBooking) {
+      // Add 60 min because the slot needs the FULL hour to be available
+      if (nowMinutes >= slotStartMinAdj) {
+        isClickable = false;
+        status = 'expired';
+        statusLabel = 'فات الوقت';
+        statusClass = 'status-expired';
+        nodeClass = 'status-node-orange';
+        pillClass = 'status-pill-orange';
+        return { slot, index, status, statusLabel, statusClass, nodeClass, pillClass, isClickable, pricing, isNight, matchedBooking };
+      }
+    }
 
     if (matchedBooking) {
       isClickable = false;
