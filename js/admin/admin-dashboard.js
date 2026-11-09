@@ -14,6 +14,7 @@ import {
   get 
 } from '../firebase-config.js';
 import { 
+  formatEgyptDateKey,
   isAdminAuthenticated, 
   loginAdmin, 
   logoutAdmin 
@@ -150,6 +151,86 @@ function initDateControls() {
 
   if (displayLabel) {
     displayLabel.textContent = formatArabicFullDate(new Date(selectedDateKey));
+  }
+}
+
+
+async function createLiveBooking(mode) {
+  try {
+    const minutes = Number(document.getElementById('liveBookingDuration')?.value);
+    const customerName = document.getElementById('liveBookingCustomer')?.value.trim() || 'حجز مباشر';
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 720) {
+      showToast('أدخل مدة صحيحة من دقيقة إلى 720 دقيقة.', 'error');
+      return;
+    }
+
+    const now = Date.now();
+    const todayKey = formatEgyptDateKey(new Date(now));
+    const todaySnapshot = await get(dbRefs.bookings(todayKey));
+    const todayBookings = todaySnapshot.val() || {};
+    let startTimestamp = now;
+
+    if (mode === 'next') {
+      const bookedUntil = Object.values(todayBookings)
+        .filter(b => b && b.status !== 'cancelled' && b.status !== 'pending' && Number(b.endTimestamp) > now)
+        .map(b => Number(b.endTimestamp));
+      if (bookedUntil.length) startTimestamp = Math.max(now, ...bookedUntil);
+    }
+
+    const dateKey = formatEgyptDateKey(new Date(startTimestamp));
+    const targetSnapshot = dateKey === todayKey ? todaySnapshot : await get(dbRefs.bookings(dateKey));
+    const existing = targetSnapshot.val() || {};
+    const cairoTime = (timestamp) => {
+      const p = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit', hour12: false
+      }).formatToParts(new Date(timestamp)).reduce((a, x) => (a[x.type] = x.value, a), {});
+      return p.hour + ':' + p.minute;
+    };
+    const startTime = cairoTime(startTimestamp);
+    const endTimestamp = startTimestamp + minutes * 60000;
+    const endTime = cairoTime(endTimestamp);
+    const [sh, sm] = startTime.split(':').map(Number);
+    const startMinute = sh * 60 + sm;
+    const conflict = findBookingConflict(startMinute, startMinute + minutes, existing);
+    if (conflict) {
+      showToast(describeBookingConflict(conflict), 'error');
+      return;
+    }
+
+    const settingsSnapshot = await get(dbRefs.settings());
+    const pricing = calculateBookingPrice(startTime, minutes / 60, settingsSnapshot.val() || {});
+    const newRef = push(dbRefs.bookings(dateKey));
+    await set(newRef, {
+      bookingId: newRef.key,
+      customerName,
+      customerPhone: 'غير مسجل',
+      phone: '',
+      date: dateKey,
+      startTime,
+      endTime,
+      durationMinutes: minutes,
+      period: pricing.periodLabel,
+      startTimestamp,
+      endTimestamp,
+      totalPrice: pricing.total,
+      paidAmount: 0,
+      remainingAmount: pricing.total,
+      status: 'confirmed',
+      notes: mode === 'now' ? 'حجز فوري من الإدارة' : 'الحجز التالي بعد الحجوزات القائمة',
+      bookingType: mode === 'now' ? 'instant' : 'queued',
+      createdAt: now,
+      updatedAt: now,
+      confirmedAt: now
+    });
+
+    document.getElementById('liveBookingModal')?.classList.remove('active');
+    if (dateKey === selectedDateKey) updateDashboardUI();
+    recordAuditLog(mode === 'now' ? 'حجز فوري' : 'الحجز التالي',
+      customerName + ' • ' + startTime + ' إلى ' + endTime + ' • ' + minutes + ' دقيقة');
+    showToast('تم تأكيد الحجز من ' + formatTime12H(startTime) + ' إلى ' + formatTime12H(endTime), 'success');
+  } catch (error) {
+    console.error('Live booking failed:', error);
+    showToast('تعذر إنشاء الحجز. حاول مرة أخرى.', 'error');
   }
 }
 
@@ -314,6 +395,34 @@ function renderPendingApprovals() {
  * Handles Modals (Manual Booking, Edit Booking, Partial Payment)
  */
 function initModals() {
+  const liveModal = document.getElementById('liveBookingModal');
+  const liveForm = document.getElementById('liveBookingForm');
+  const modeInput = document.getElementById('liveBookingMode');
+  const openNow = document.getElementById('btnBookFromNow');
+  const openNext = document.getElementById('btnBookNext');
+  const closeLive = document.getElementById('closeLiveBookingModal');
+  const cancelLive = document.getElementById('cancelLiveBookingModal');
+
+  if (openNow && liveModal) openNow.addEventListener('click', () => {
+    modeInput.value = 'now';
+    document.getElementById('liveBookingTitle').textContent = 'حجز الملعب من الآن';
+    document.getElementById('liveBookingStartHint').textContent = 'سيبدأ الحجز فور التأكيد حسب توقيت القاهرة الحالي.';
+    liveModal.classList.add('active');
+  });
+  if (openNext && liveModal) openNext.addEventListener('click', () => {
+    modeInput.value = 'next';
+    document.getElementById('liveBookingTitle').textContent = 'تسجيل الحجز التالي';
+    document.getElementById('liveBookingStartHint').textContent = 'سيبدأ بعد انتهاء آخر حجز مؤكد قائم أو قادم.';
+    liveModal.classList.add('active');
+  });
+  [closeLive, cancelLive].forEach(button => {
+    if (button) button.addEventListener('click', () => liveModal?.classList.remove('active'));
+  });
+  if (liveForm) liveForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    await createLiveBooking(modeInput.value);
+  });
+
   // Manual Booking Modal
   const btnNewBooking = document.getElementById('btnOpenManualBookingModal');
   const manualModal = document.getElementById('manualBookingModal');
