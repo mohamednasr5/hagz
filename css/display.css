@@ -1,0 +1,282 @@
+/* display.css - Ahmadiah Stadium Live TV Display Screen */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --bg-tv: #050b18;
+  --bg-tv-card: rgba(14, 25, 45, 0.85);
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  --font-tv: 'Cairo', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-tv);
+  direction: rtl;
+  background-color: var(--bg-tv);
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding: 24px;
+  background-image: 
+    radial-gradient(circle at 50% 10%, rgba(16, 185, 129, 0.15), transparent 70%),
+    radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.1), transparent 50%);
+}
+
+.tv-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: calc(100vh - 48px);
+}
+
+/* TV Top Bar */
+.tv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-tv-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 16px 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.tv-logo-area {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.tv-logo-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+}
+
+.tv-logo-text h1 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.tv-logo-text p {
+  color: var(--accent-green);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.tv-time-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.tv-digital-clock {
+  font-size: 2.2rem;
+  font-weight: 900;
+  font-family: monospace;
+  color: #fff;
+  letter-spacing: 2px;
+  direction: ltr;
+}
+
+.tv-date-tag {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #94a3b8;
+  border-right: 2px solid rgba(255, 255, 255, 0.15);
+  padding-right: 18px;
+}
+
+/* Main TV Split View */
+.tv-content-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  flex: 1;
+}
+
+@media (max-width: 1024px) {
+  .tv-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Spotlight Active Match Panel */
+.tv-main-spotlight {
+  background: var(--bg-tv-card);
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  border-radius: 24px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(239, 68, 68, 0.25);
+}
+
+.tv-main-spotlight.idle-state {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 50px rgba(16, 185, 129, 0.2);
+}
+
+.tv-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent-red);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  width: fit-content;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+}
+
+.tv-match-info {
+  margin-top: 20px;
+}
+
+.tv-match-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.tv-match-period {
+  font-size: 1.4rem;
+  color: #94a3b8;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Huge TV Countdown */
+.tv-countdown-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 30px 0;
+}
+
+.tv-countdown-label {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fca5a5;
+  margin-bottom: 12px;
+}
+
+.tv-huge-digits {
+  font-size: 6.5rem;
+  font-weight: 900;
+  font-family: monospace;
+  color: #ff4d4d;
+  text-shadow: 0 0 35px rgba(239, 68, 68, 0.8);
+  line-height: 1;
+  letter-spacing: 4px;
+  direction: ltr;
+}
+
+.tv-progress-bar-wrap {
+  width: 100%;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tv-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+  transition: width 1s linear;
+}
+
+/* Next Matches & Upcoming List Side */
+.tv-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tv-card-section {
+  background: var(--bg-tv-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tv-section-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #38bdf8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+}
+
+.tv-upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.tv-upcoming-item {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tv-upcoming-time {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.tv-upcoming-status {
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+/* TV Footer Attribution */
+.tv-footer {
+  text-align: center;
+  font-size: 1rem;
+  color: #94a3b8;
+  padding-top: 10px;
+}
+.tv-footer a {
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 800;
+}

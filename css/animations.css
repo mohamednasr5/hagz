@@ -1,0 +1,92 @@
+/* animations.css - Sports Stadium Keyframes & Motion */
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.8), inset 0 0 15px rgba(16, 185, 129, 0.4);
+  }
+}
+
+@keyframes pulseRed {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+  }
+}
+
+@keyframes pulseYellow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
+  }
+}
+
+@keyframes stadiumLightSweep {
+  0% {
+    transform: rotate(-15deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(-15deg) translateX(300%);
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes countdownTicking {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.anim-pulse-glow {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+.anim-pulse-red {
+  animation: pulseRed 2s infinite ease-in-out;
+}
+
+.anim-pulse-yellow {
+  animation: pulseYellow 2s infinite ease-in-out;
+}
+
+.anim-countdown {
+  animation: countdownTicking 1s infinite ease-in-out;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}

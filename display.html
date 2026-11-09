@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>شاشة الملعب المباشرة | مركز شباب الأحمدية</title>
+  <meta name="theme-color" content="#050b18">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/display.css">
+</head>
+<body>
+
+  <div class="tv-container">
+    <!-- TV Header -->
+    <header class="tv-header">
+      <div class="tv-logo-area">
+        <img src="assets/icons/icon-192.svg" alt="ملعب الأحمدية" class="tv-logo-icon">
+        <div class="tv-logo-text">
+          <h1 id="tvPitchName">ملعب مركز شباب الأحمدية الخماسي</h1>
+          <p>شاشة العرض والمراقبة اللحظية للملعب • LIVE PITCH DISPLAY</p>
+        </div>
+      </div>
+
+      <div class="tv-time-box">
+        <div class="tv-date-tag" id="tvDateDisplay">--</div>
+        <div class="tv-digital-clock" id="tvDigitalClock">00:00:00</div>
+      </div>
+    </header>
+
+    <!-- TV Split Content Grid -->
+    <main class="tv-content-grid">
+      <!-- Main Spotlight: Current Match -->
+      <section id="tvSpotlight" class="tv-main-spotlight idle-state">
+        <div>
+          <div id="tvLiveBadge" class="tv-badge-live" style="background: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);">
+            <span>🟢 الملعب متاح حالياً</span>
+          </div>
+
+          <div class="tv-match-info">
+            <h2 id="tvMatchTitle" class="tv-match-title">لا توجد مباراة جارية الآن</h2>
+            <div id="tvMatchPeriod" class="tv-match-period">
+              <span>الملعب جاهز لاستقبال الحجز القادم</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tv-countdown-section">
+          <div id="tvCountdownLabel" class="tv-countdown-label">الوقت المتبقي من مدة الحجز</div>
+          <div id="tvHugeCountdown" class="tv-huge-digits">--:--</div>
+          
+          <div class="tv-progress-bar-wrap">
+            <div id="tvProgressBar" class="tv-progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; color: #cbd5e1;">
+          <div id="tvMatchStartEnd">--:-- ➔ --:--</div>
+          <div id="tvLightingStatus">💡 إضاءة الملعب: تشغيل تلقائي</div>
+        </div>
+      </section>
+
+      <!-- Side Panel: Upcoming & Availability -->
+      <aside class="tv-side-panel">
+        <!-- Next Match Card -->
+        <div class="tv-card-section" style="max-height: 200px;">
+          <h3 class="tv-section-title">
+            <span>⏭️ المباراة القادمة التالية</span>
+          </h3>
+          <div id="tvNextMatchArea" style="font-size: 1.1rem; color: #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
+            <div style="color: #94a3b8;">جارٍ فحص جدول المباريات...</div>
+          </div>
+        </div>
+
+        <!-- Today's Schedule Overview -->
+        <div class="tv-card-section">
+          <h3 class="tv-section-title">
+            <span>📋 جدول مباريات اليوم المتبقية</span>
+          </h3>
+          <div id="tvUpcomingList" class="tv-upcoming-list">
+            <!-- List items populated dynamically by display.js -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- TV Footer -->
+    <footer class="tv-footer">
+      نظام تشغيل وإدارة الملاعب الذكي • برمجة وتطوير المهندس 
+      <a href="https://www.facebook.com/en.mohamed.nasr" target="_blank" rel="noopener noreferrer">
+        محمد حماد
+      </a>
+    </footer>
+  </div>
+
+  <script type="module" src="js/display.js"></script>
+</body>
+</html>

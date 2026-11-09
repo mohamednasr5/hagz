@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070d1e"/>
+      <stop offset="50%" stop-color="#0f2b3c"/>
+      <stop offset="100%" stop-color="#0a192f"/>
+    </linearGradient>
+    <linearGradient id="pitchGrad192" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad192)"/>
+  <rect width="504" height="504" x="4" y="4" rx="106" fill="none" stroke="#10b981" stroke-width="6" stroke-opacity="0.3"/>
+  <rect x="76" y="96" width="360" height="320" rx="18" fill="url(#pitchGrad192)" stroke="#ffffff" stroke-width="8" opacity="0.95"/>
+  <path d="M76 136 h360 M76 216 h360 M76 296 h360 M76 376 h360" stroke="#047857" stroke-width="26" opacity="0.35"/>
+  <line x1="76" y1="256" x2="436" y2="256" stroke="#ffffff" stroke-width="6"/>
+  <circle cx="256" cy="256" r="54" fill="none" stroke="#ffffff" stroke-width="6"/>
+  <circle cx="256" cy="256" r="28" fill="#ffffff"/>
+  <path d="M256 236 L272 248 L266 268 L246 268 L240 248 Z" fill="#0b132b"/>
+</svg>

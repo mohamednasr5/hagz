@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "adminHash": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "bookings": {
+      "$date": {
+        ".read": true,
+        "$bookingId": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['customerName', 'startTime', 'endTime', 'durationMinutes', 'totalPrice', 'status'])",
+          "status": {
+            ".validate": "newData.val() === 'pending' || newData.val() === 'confirmed' || newData.val() === 'cancelled'"
+          }
+        }
+      }
+    },
+    "expenses": {
+      ".read": true,
+      ".write": true
+    },
+    "payments": {
+      ".read": true,
+      ".write": true
+    },
+    "telegramSubscribers": {
+      ".read": true,
+      ".write": true
+    },
+    "auditLogs": {
+      ".read": true,
+      ".write": true
+    },
+    "adminUsers": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

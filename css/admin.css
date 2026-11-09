@@ -1,0 +1,495 @@
+/* admin.css - Ahmadiah Pitch Manager Administrator Portal */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --admin-bg: #070d1e;
+  --admin-sidebar: #0b1528;
+  --admin-card: rgba(15, 28, 48, 0.85);
+  --admin-border: rgba(255, 255, 255, 0.08);
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --font-admin: 'Cairo', sans-serif;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-admin);
+  direction: rtl;
+  background-color: var(--admin-bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Authentication Screen */
+.auth-wrapper {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, #0d2238 0%, #070d1e 80%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.auth-box {
+  background: rgba(15, 28, 48, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  padding: 36px 30px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  text-align: center;
+}
+
+.auth-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
+}
+
+.auth-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.auth-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 14px;
+  color: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  margin-bottom: 16px;
+  outline: none;
+  text-align: center;
+  letter-spacing: 2px;
+  transition: border-color 0.2s;
+}
+
+.auth-input:focus {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.auth-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.auth-error {
+  color: var(--accent-red);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 12px;
+  display: none;
+}
+
+/* Admin Dashboard Layout */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 260px;
+  background: var(--admin-sidebar);
+  border-left: 1px solid var(--admin-border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 50;
+  transition: transform 0.3s ease;
+}
+
+@media (max-width: 992px) {
+  .admin-sidebar {
+    transform: translateX(100%);
+  }
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--admin-border);
+  margin-bottom: 20px;
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.sidebar-brand h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: right;
+  font-family: inherit;
+}
+
+.menu-item:hover, .menu-item.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--accent-green);
+}
+
+.menu-item svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--admin-border);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Main Content Area */
+.admin-main {
+  flex: 1;
+  margin-right: 260px;
+  padding: 24px;
+  max-width: 1400px;
+}
+
+@media (max-width: 992px) {
+  .admin-main {
+    margin-right: 0;
+    padding: 16px;
+  }
+}
+
+/* Top Navigation Bar */
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  margin-bottom: 24px;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mobile-toggle-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 992px) {
+  .mobile-toggle-btn {
+    display: flex;
+  }
+}
+
+.topbar-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* KPI Cards Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.kpi-title {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.kpi-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.kpi-card.green .kpi-value { color: var(--accent-green); }
+.kpi-card.red .kpi-value { color: var(--accent-red); }
+.kpi-card.yellow .kpi-value { color: var(--accent-yellow); }
+.kpi-card.blue .kpi-value { color: var(--accent-blue); }
+.kpi-card.purple .kpi-value { color: var(--accent-purple); }
+
+.kpi-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  width: fit-content;
+  font-weight: 700;
+}
+
+/* Sections Containers */
+.admin-tab-section {
+  display: none;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-tab-section.active {
+  display: flex;
+}
+
+/* Section Box / Panels */
+.panel-box {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.panel-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Data Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 0.92rem;
+}
+
+.admin-table th {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px 16px;
+  color: var(--text-muted);
+  font-weight: 800;
+  border-bottom: 1px solid var(--admin-border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Action Buttons inside Table */
+.btn-action {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.btn-action.approve {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+.btn-action.approve:hover {
+  background: var(--accent-green);
+  color: #000;
+}
+
+.btn-action.cancel {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.btn-action.cancel:hover {
+  background: var(--accent-red);
+  color: #fff;
+}
+
+.btn-action.edit {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.btn-action.pay {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Charts Layout */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.chart-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+/* Settings Form Grid */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Audit Log List */
+.audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.audit-item {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}

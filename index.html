@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>مدير ملعب الأحمدية | حجز وتشغيل الملعب الخماسي</title>
+  <meta name="description" content="نظام إدارة وحجز الملعب الخماسي بمركز شباب الأحمدية - حجز مباشر لحظي، تسعير نهاري وليلي، ومراقبة حية للمباريات">
+  <meta name="theme-color" content="#0d1b2a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ملعب الأحمدية">
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Offline Warning Banner -->
+  <div id="offlineBanner" class="offline-banner">
+    ⚠️ أنت غير متصل بالإنترنت حالياً. يمكنك تصفح المواعيد المسجلة ولكن الحجز معطل حتى استعادة الاتصال.
+  </div>
+
+  <!-- Top App Bar Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-section">
+        <img src="assets/icons/icon-192.svg" alt="شعار ملعب الأحمدية" class="logo-icon">
+        <div class="logo-text">
+          <h1 id="pitchNameTitle">ملعب الأحمدية الخماسي</h1>
+          <span>مركز شباب الأحمدية • تشغيل مباشر</span>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <!-- Live Egypt Digital Clock -->
+        <div class="egypt-clock-badge" title="توقيت جمهورية مصر العربية">
+          <span class="clock-pulse-dot"></span>
+          <span id="liveEgyptClock">00:00:00 ص</span>
+        </div>
+
+        <!-- Stadium TV Display Link -->
+        <a href="display.html" class="header-btn live-screen-btn" title="فتح شاشة العرض التلفزيونية للملعب">
+          <span>📺 شاشة الملعب</span>
+        </a>
+
+        <!-- Admin Portal Link -->
+        <a href="admin/index.html" class="header-btn" title="لوحة تحكم الإدارة">
+          <span>🔒 الإدارة</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- PWA Install Banner (Shown when installable) -->
+    <div id="pwaInstallPrompt" style="display: none; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(13, 27, 42, 0.9)); border: 1px solid var(--accent-green); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.6rem;">📱</span>
+        <div>
+          <div style="font-weight: 800; font-size: 0.95rem;">تثبيت تطبيق ملعب الأحمدية</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">احجز وتابع المواعيد فورياً من شاشتك الرئيسية كأي تطبيق هاتف أصلي</div>
+        </div>
+      </div>
+      <button id="btnInstallApp" class="btn-primary" style="padding: 6px 16px; font-size: 0.85rem;">
+        تثبيت الآن
+      </button>
+    </div>
+
+    <!-- Hero Stadium Section -->
+    <section class="hero-stadium" id="section-home">
+      <div class="hero-content">
+        <div class="hero-tag">
+          ⚽ نجيل صناعي تركي من الجيل الجديد • إضاءة ليلية عالية الكفاءة
+        </div>
+        <h2 class="hero-title">
+          احجز موعدك الآن في أفضل ملعب خماسي بمركز شباب الأحمدية
+        </h2>
+        <p class="hero-desc">
+          نظام حجز فوري لحظي بدقة الثانية، مع تسعير تلقائي عادل للفترات النهارية والليلية، ومتابعة حية للمباريات والوقت المتبقي.
+        </p>
+
+        <div class="hero-badges-row">
+          <div class="pricing-pill">
+            <span>☀️ سعر الساعة النهارية:</span>
+            <strong id="heroDayRate">120 ج.م</strong>
+          </div>
+          <div class="pricing-pill">
+            <span>🌙 سعر الساعة الليلية (بالكشافات):</span>
+            <strong id="heroNightRate">180 ج.م</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active Ongoing Match Spotlight Card (Mounted via countdownEngine) -->
+    <section id="activeMatchCard" class="active-match-card">
+      <div class="active-match-header">
+        <div class="live-indicator">
+          <span>● مباشر الآن</span>
+        </div>
+        <div class="active-match-details">
+          <h3 id="activeCustomerName">مباراة جارية</h3>
+          <div class="active-match-meta">
+            <span id="activeMatchTime">--:-- إلى --:--</span> • <span id="activeMatchPeriod">نهاري/ليلي</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="countdown-box">
+        <div class="countdown-digits">
+          <div class="digit-segment">
+            <div id="countHours" class="val">00</div>
+            <div class="lbl">ساعة</div>
+          </div>
+          <div class="digit-sep">:</div>
+          <div class="digit-segment">
+            <div id="countMinutes" class="val">00</div>
+            <div class="lbl">دقيقة</div>
+          </div>
+          <div class="digit-sep">:</div>
+          <div class="digit-segment">
+            <div id="countSeconds" class="val">00</div>
+            <div class="lbl">ثانية</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; margin-top: 10px;">
+        <div id="activeMatchProgressFill" style="width: 0%; height: 100%; background: var(--accent-red); transition: width 1s linear;"></div>
+      </div>
+    </section>
+
+    <!-- Schedule Section -->
+    <section id="section-schedule">
+      <!-- Date Controls Bar -->
+      <div class="schedule-controls">
+        <div class="date-nav">
+          <button id="prevDateBtn" class="nav-arrow-btn" title="اليوم السابق">➔</button>
+          
+          <div id="dateDisplayArea" class="date-display" style="cursor: pointer;" title="انقر لتحديد تاريخ معين من التقويم">
+            <span id="dateDayName" class="date-day-name">اليوم</span>
+            <span id="dateFormatted" class="date-formatted">--</span>
+            <input type="date" id="datePickerInput" class="date-input-hidden">
+          </div>
+
+          <button id="nextDateBtn" class="nav-arrow-btn" title="اليوم التالي">←</button>
+        </div>
+
+        <div class="date-quick-actions">
+          <button id="todayDateBtn" class="btn-today">📅 اليوم الحالي</button>
+        </div>
+      </div>
+
+      <!-- Color Status Legend -->
+      <div class="status-legend">
+        <div class="legend-item">
+          <span class="legend-color legend-green"></span>
+          <span>قابل للحجز (متاح)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color legend-red"></span>
+          <span>محجوز (مؤكد)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color legend-yellow"></span>
+          <span>في انتظار التأكيد</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color legend-orange"></span>
+          <span>انتهى الحجز</span>
+        </div>
+      </div>
+
+      <!-- Realtime Schedule Slots Grid -->
+      <div id="slotsContainer" class="slots-grid">
+        <!-- Slots injected dynamically by schedule.js -->
+      </div>
+    </section>
+
+    <!-- Telegram Notifications Banner -->
+    <section style="margin-top: 36px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(13, 27, 42, 0.85)); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="background: rgba(59, 130, 246, 0.2); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+          📢
+        </div>
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800;">اشترك في إشعارات بوت تيليجرام للملعب</h3>
+          <p style="font-size: 0.88rem; color: #94a3b8;">تصلك تنبيهات فورية بكل حجز مؤكد، والمواعيد الشاغرة، وتنبيهات انتهاء الوقت مباشرة على هاتفك.</p>
+        </div>
+      </div>
+      <div>
+        <a href="https://t.me/AhmadiahPitchBot" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background: #2563eb; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+          <span>🚀 فتح البوت والاشتراك مجاناً (@AhmadiahPitchBot)</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Pitch Information Section -->
+    <section id="section-info" style="margin-top: 36px; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 24px;">
+      <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 16px; border-bottom: 1px solid var(--border-glass); padding-bottom: 10px;">
+        ℹ️ معلومات وقواعد حجز ملعب مركز شباب الأحمدية
+      </h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; font-size: 0.92rem; color: #cbd5e1;">
+        <div style="display: flex; gap: 10px;">
+          <span>📍</span>
+          <div><strong>الموقع:</strong> محافظة الدقهلية - مركز شربين - مركز شباب قرية الأحمدية.</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <span>💡</span>
+          <div><strong>الإضاءة:</strong> كشافات LED ليد ليلية قوية عالية الوضوح تغطي كامل مساحة الملعب.</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <span>⚽</span>
+          <div><strong>الكرات والتجهيزات:</strong> تتوفر كرات ومستلزمات المباريات مع الإدارة عند الطلب.</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <span>⏱️</span>
+          <div><strong>الانضباط في الوقت:</strong> يرجى الحضور قبل الموعد بـ 10 دقائق لضمان الاستفادة الكاملة من الوقت.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Booking Modal Window -->
+  <div id="bookingModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>⚡ حجز موعد جديد في الملعب</h2>
+        <button id="closeBookingModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+
+      <form id="bookingForm">
+        <div class="modal-body">
+          <input type="hidden" id="bookingDate">
+
+          <div class="form-group">
+            <label>التاريخ المحدد:</label>
+            <div id="bookingDateDisplay" style="font-weight: 800; color: var(--accent-green); font-size: 1.05rem;">--</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="bookingStartTime">وقت البداية:</label>
+              <input type="time" id="bookingStartTime" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="bookingDuration">المدة (ساعات):</label>
+              <select id="bookingDuration" class="form-select">
+                <option value="1">ساعة واحدة (60 دقيقة)</option>
+                <option value="1.5">ساعة ونصف (90 دقيقة)</option>
+                <option value="2">ساعتان (120 دقيقة)</option>
+                <option value="3">3 ساعات</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="customerName">اسم العميل / اسم الفريق: *</label>
+            <input type="text" id="customerName" class="form-input" placeholder="مثال: فريق الكابتن أحمد" required>
+          </div>
+
+          <div class="form-group">
+            <label for="customerPhone">رقم هاتف للتواصل (اختياري):</label>
+            <input type="tel" id="customerPhone" class="form-input" placeholder="010xxxxxxxx" dir="ltr" style="text-align: right;">
+          </div>
+
+          <!-- Live Pricing Breakdown Card -->
+          <div class="price-breakdown-card">
+            <div class="price-row">
+              <span>تصنيف الفترة:</span>
+              <strong id="previewPeriodTag">نهاري</strong>
+            </div>
+            <div class="price-row">
+              <span>ساعات النهار (<span id="previewDayHours">1 ساعة</span>):</span>
+              <span id="previewDayPrice">0 ج.م</span>
+            </div>
+            <div class="price-row">
+              <span>ساعات الليل بالإنارة (<span id="previewNightHours">0 ساعة</span>):</span>
+              <span id="previewNightPrice">0 ج.م</span>
+            </div>
+            <div class="price-row total-row">
+              <span>إجمالي قيمة الحجز المقدرة:</span>
+              <span id="previewTotalPrice">0 ج.م</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="bookingNotes">ملاحظات إضافية (اختياري):</label>
+            <textarea id="bookingNotes" class="form-textarea" rows="2" placeholder="أي متطلبات خاصة بالكرة أو الإضاءة"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelBookingModalBtn" class="btn-secondary">إلغاء</button>
+          <button type="submit" id="submitBookingBtn" class="btn-primary">إرسال طلب الحجز ⚡</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <a href="#section-home" class="bottom-nav-item active" data-target="#section-home">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>الرئيسية</span>
+    </a>
+    <a href="#section-schedule" class="bottom-nav-item" data-target="#section-schedule">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+      <span>جدول الحجوزات</span>
+    </a>
+    <a href="display.html" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+      <span>شاشة الملعب</span>
+    </a>
+    <a href="#section-info" class="bottom-nav-item" data-target="#section-info">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      <span>معلومات الملعب</span>
+    </a>
+  </nav>
+
+  <!-- Professional Developer Attribution Footer -->
+  <footer class="app-footer">
+    <div>جميع الحقوق محفوظة © 2026 - نظام إدارة وتشغيل ملعب مركز شباب الأحمدية</div>
+    <div class="footer-attribution">
+      برمجة وتطوير المهندس 
+      <a href="https://www.facebook.com/en.mohamed.nasr" target="_blank" rel="noopener noreferrer" class="developer-link">
+        محمد حماد
+      </a>
+    </div>
+  </footer>
+
+  <!-- Modular Scripts -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
