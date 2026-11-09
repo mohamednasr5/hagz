@@ -75,16 +75,16 @@
     </div>
 
     <!-- Hero Stadium Section -->
-    <section class="hero-stadium" id="section-home">
+    <section class="hero-stadium premium-hero" id="section-home">
       <div class="hero-content">
         <div class="hero-tag">
           ⚽ نجيل صناعي تركي من الجيل الجديد • إضاءة ليلية عالية الكفاءة
         </div>
-        <h2 class="hero-title">
-          احجز موعدك الآن في أفضل ملعب خماسي بمركز شباب الأحمدية
+        <div class="hero-eyebrow">AHMADIAH PITCH • SMART BOOKING</div>\n        <h2 class="hero-title">
+          تجربة حجز ذكية… وموعدك على أرض الملعب يبدأ من هنا
         </h2>
         <p class="hero-desc">
-          نظام حجز فوري لحظي بدقة الثانية، مع تسعير تلقائي عادل للفترات النهارية والليلية، ومتابعة حية للمباريات والوقت المتبقي.
+          اختر بداية الموعد بالدقيقة، وحدد المدة التي تناسب فريقك. النظام يحسب السعر ويتحقق من تعارض الحجوزات لحظياً.
         </p>
 
         <div class="hero-badges-row">
@@ -299,12 +299,8 @@
             </div>
             <div class="form-group">
               <label for="bookingDuration">المدة (ساعات):</label>
-              <select id="bookingDuration" class="form-select">
-                <option value="1">ساعة واحدة (60 دقيقة)</option>
-                <option value="1.5">ساعة ونصف (90 دقيقة)</option>
-                <option value="2">ساعتان (120 دقيقة)</option>
-                <option value="3">3 ساعات</option>
-              </select>
+              <input type="number" id="bookingDuration" class="form-input" min="0.5" max="12" step="0.5" value="1" inputmode="decimal" required>
+              <small class="field-hint">أدخل المدة بالساعات؛ يمكنك اختيار نصف ساعة أو 1.5 أو 2.5 ساعة، وهكذا.</small>
             </div>
           </div>
 
