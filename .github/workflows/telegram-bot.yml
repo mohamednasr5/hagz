@@ -36,5 +36,8 @@ jobs:
             exit 1
           fi
 
+      - name: Validate bot JavaScript
+        run: node --check bot-runner.js
+
       - name: Start bot polling and booking notifications
         run: node bot-runner.js
