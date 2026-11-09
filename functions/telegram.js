@@ -173,7 +173,7 @@ async function notifyBookingExpired(booking) {
 انتهت فترة المباراة المحددة.
 
 📅 <b>التاريخ:</b> ${booking.date}
-🕒 <b>الوقت المنتهي:</b> ${booking.startTime} - ${booking.endTime}
+🕒 <b>الوقت المنتهي:</b> ${formatBookingRange(booking)}
 
 الملعب جاهز لاستقبال الحجز القادم.
 📍 <i>مركز شباب الأحمدية</i>
