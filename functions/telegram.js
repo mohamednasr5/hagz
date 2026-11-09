@@ -9,6 +9,20 @@ const admin = require('firebase-admin');
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org/bot';
 
+/** Convert stored HH:mm into a 12-hour Arabic time for notifications. */
+function formatTime12Hour(time) {
+  if (!time || typeof time !== 'string') return '';
+  const [hourPart, minutePart = '00'] = time.split(':');
+  const hour = Number(hourPart);
+  const suffix = hour >= 12 ? 'م' : 'ص';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutePart} ${suffix}`;
+}
+
+function formatBookingRange(booking) {
+  return `${formatTime12Hour(booking.startTime)} - ${formatTime12Hour(booking.endTime)}`;
+}
+
 /**
  * Gets configured Bot Token securely from environment or Realtime Database settings
  */
@@ -118,7 +132,7 @@ async function handleTelegramUpdate(update) {
       scheduleText += 'لا توجد حجوزات مؤكدة مسجلة لليوم حتى الآن.';
     } else {
       sorted.forEach(b => {
-        scheduleText += `⏰ <b>${b.startTime} - ${b.endTime}</b>: محجوز (${b.period || 'خماسي'})\n`;
+        scheduleText += `⏰ <b>${formatBookingRange(b)}</b>: محجوز (${b.period || 'خماسي'})\n`;
       });
     }
 
@@ -141,7 +155,7 @@ async function notifyBookingConfirmed(booking) {
 تم تأكيد حجز جديد في الملعب!
 
 📅 <b>التاريخ:</b> ${booking.date}
-🕒 <b>الوقت:</b> ${booking.startTime} - ${booking.endTime}
+🕒 <b>الوقت:</b> ${formatBookingRange(booking)}
 🌙 <b>الفترة:</b> ${booking.period || 'نهاري/ليلي'}
 📌 <b>الحالة:</b> محجوز ومؤكد (BOOKED)
 
@@ -159,7 +173,7 @@ async function notifyBookingExpired(booking) {
 انتهت فترة المباراة المحددة.
 
 📅 <b>التاريخ:</b> ${booking.date}
-🕒 <b>الوقت المنتهي:</b> ${booking.startTime} - ${booking.endTime}
+🕒 <b>الوقت المنتهي:</b> ${formatBookingRange(booking)}
 
 الملعب جاهز لاستقبال الحجز القادم.
 📍 <i>مركز شباب الأحمدية</i>

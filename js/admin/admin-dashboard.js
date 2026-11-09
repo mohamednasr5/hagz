@@ -28,6 +28,8 @@ import {
   calculateBookingPrice, 
   timeStringToMinutes,
   populateTimeSelect,
+  findBookingConflict,
+  describeBookingConflict,
   showToast 
 } from '../utils.js';
 import { calculateDailyFinances, renderDailyFinancialReport } from './finance.js';
@@ -351,16 +353,12 @@ function initModals() {
           return;
         }
         const endMin = startMin + durationMinutes;
-        const conflict = Object.entries(dayBookings).some(([id, b]) => {
-          if (b.status === 'cancelled') return false;
-          const bStart = timeStringToMinutes(b.startTime);
-          const bEnd = bStart + (Number(b.durationMinutes) || 60);
-          return startMin < bEnd && endMin > bStart;
-        });
+        const conflict = findBookingConflict(startMin, endMin, dayBookings);
         if (conflict) {
-          showToast('لا يمكن إنشاء الحجز؛ يوجد حجز آخر يتداخل مع هذه الفترة.', 'error');
+          showToast(describeBookingConflict(conflict), 'error');
           return;
         }
+
         const endH = Math.floor(endMin / 60) % 24;
         const endM = endMin % 60;
         const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;

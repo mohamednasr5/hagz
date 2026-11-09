@@ -1360,3 +1360,20 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .premium-hero::before, .active-match-card::before, .logo-icon { animation:none !important; }
 }
+
+/* Flexible half-hour schedule: make each booking chip readable on smaller screens. */
+.tactical-line-row { row-gap: 16px; }
+.player-slot-circle { animation: premiumDepthPulse 3.8s ease-in-out infinite; }
+.player-slot-circle:nth-child(2n) { animation-delay: .35s; }
+.slot-card { transform-style: preserve-3d; transition: transform .28s ease, box-shadow .28s ease; }
+.slot-card:hover { transform: perspective(950px) rotateX(2deg) rotateY(-2deg) translateY(-4px); box-shadow: 0 24px 45px rgba(0,0,0,.32), 0 0 20px rgba(85,230,208,.10); }
+.price-breakdown-card { transform-style: preserve-3d; transition: transform .28s ease, box-shadow .28s ease; }
+.price-breakdown-card:hover { transform: perspective(900px) rotateX(2deg) rotateY(-2deg) translateY(-3px); box-shadow: 0 24px 48px rgba(0,0,0,.36), 0 0 25px rgba(85,230,208,.12); }
+@media (max-width: 640px) {
+  .premium-hero { border-radius: 18px; }
+  .hero-eyebrow { font-size: .64rem; letter-spacing: .1em; }
+  .player-slot-circle { transform: none !important; animation: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .player-slot-circle { animation: none !important; }
+}

@@ -80,7 +80,7 @@ export function formatSlotRange12H(startTime, endTime) {
 }
 
 /** Create 30-minute choices; values stay canonical HH:mm while labels use 12-hour time. */
-export function buildTimeOptions(startHour = 9, endHour = 24, stepMinutes = 30) {
+export function buildTimeOptions(startHour = 9, endHour = 24.5, stepMinutes = 30) {
   const options = [];
   for (let minute = startHour * 60; minute <= endHour * 60; minute += stepMinutes) {
     const normalized = minute % 1440;
@@ -114,6 +114,53 @@ export function formatTimeArabic(hour, minute = 0) {
 /**
  * Parses "HH:mm" to minutes since midnight
  */
+/**
+ * Find a booking that overlaps a requested interval and report the exact overlap in minutes.
+ * A booking ending exactly when another starts is valid; only positive overlap is blocked.
+ */
+export function findBookingConflict(startMinutes, endMinutes, bookings = {}, excludeId = null) {
+  const start = Number(startMinutes);
+  const end = Number(endMinutes);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
+
+  for (const [id, booking] of Object.entries(bookings || {})) {
+    if (id === excludeId || !booking || booking.status === 'cancelled') continue;
+    const existingStart = timeStringToMinutes(booking.startTime);
+    const existingDuration = Number(booking.durationMinutes) || 60;
+    const existingEnd = existingStart + existingDuration;
+    const overlapStart = Math.max(start, existingStart);
+    const overlapEnd = Math.min(end, existingEnd);
+    const overlapMinutes = Math.max(0, overlapEnd - overlapStart);
+
+    if (overlapMinutes > 0) {
+      return { booking, bookingId: id, overlapMinutes, existingStart, existingEnd, overlapStart, overlapEnd };
+    }
+  }
+  return null;
+}
+
+export function formatMinutesArabic(minutes) {
+  const value = Math.max(0, Math.round(Number(minutes) || 0));
+  if (value < 60) return `${value} دقيقة`;
+  const hours = Math.floor(value / 60);
+  const remainder = value % 60;
+  return remainder ? `${hours} ساعة و${remainder} دقيقة` : `${hours} ساعة`;
+}
+
+export function formatMinuteOfDay12H(totalMinutes) {
+  const normalized = ((Math.round(totalMinutes) % 1440) + 1440) % 1440;
+  const time = `${String(Math.floor(normalized / 60)).padStart(2, '0')}:${String(normalized % 60).padStart(2, '0')}`;
+  return formatTime12H(time);
+}
+
+export function describeBookingConflict(conflict) {
+  if (!conflict) return '';
+  const { booking, overlapMinutes, overlapStart, overlapEnd } = conflict;
+  const customer = booking.customerName ? ` مع حجز ${booking.customerName}` : ' مع حجز سابق';
+  const overlapRange = `${formatMinuteOfDay12H(overlapStart)} - ${formatMinuteOfDay12H(overlapEnd)}`;
+  return `لا يصلح هذا الحجز: توجد ${formatMinutesArabic(overlapMinutes)} متداخلة${customer} (${overlapRange}). اختر وقتاً آخر.`;
+}
+
 export function timeStringToMinutes(timeStr) {
   if (!timeStr) return 0;
   const [h, m] = timeStr.split(':').map(Number);

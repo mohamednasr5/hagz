@@ -131,8 +131,6 @@ export function renderSlots() {
   // Compute status for all slots
   const evaluatedSlots = slots.map((slot, index) => {
     const slotStartMin = timeStringToMinutes(slot.startTime);
-    // For midnight slot (00:00), treat as next-day 24*60 for comparison
-    const slotStartMinAdj = slotStartMin === 0 ? 24 * 60 : slotStartMin;
     let matchedBooking = null;
     let matchedBookingId = null;
 
@@ -172,8 +170,7 @@ export function renderSlots() {
 
     // ── TODAY: past time slots (time already gone) are expired/unclickable ──
     if (todayDate && !matchedBooking) {
-      // Add 60 min because the slot needs the FULL hour to be available
-      if (nowMinutes >= slotStartMinAdj) {
+      if (nowMinutes >= slotStartMin) {
         isClickable = false;
         status = 'expired';
         statusLabel = 'فات الوقت';
@@ -243,16 +240,12 @@ function renderTacticalFormation(evaluatedSlots) {
   const container = document.getElementById('tacticalPitchFormation');
   if (!container) return;
 
-  // Split into 4 tactical lines:
-  // Line 1: الصباح (Slots 0 to 3: 09:00 ص - 12:00 م)
-  // Line 2: الظهيرة والعصر (Slots 4 to 7: 01:00 م - 04:00 م)
-  // Line 3: المغرب والعشاء (Slots 8 to 11: 05:00 م - 08:00 م)
-  // Line 4: سهرة الكشافات (Slots 12 to 15: 09:00 م - 12:00 ص)
+  // Divide all half-hour periods into four readable time bands.
   const lines = [
-    { title: '☀️ تشكيلة الصباح (09:00 ص - 01:00 م)', slots: evaluatedSlots.slice(0, 4) },
-    { title: '☀️ تشكيلة الظهيرة والعصر (01:00 م - 05:00 م)', slots: evaluatedSlots.slice(4, 8) },
-    { title: '🌅 تشكيلة المغرب وبداية المساء (05:00 م - 09:00 م)', slots: evaluatedSlots.slice(8, 12) },
-    { title: '💡 تشكيلة سهرة الكشافات الليلية (09:00 م - 01:00 ص)', slots: evaluatedSlots.slice(12, 16) }
+    { title: '☀️ الفترة الصباحية (09:00 ص - 01:00 م)', slots: evaluatedSlots.filter(x => timeStringToMinutes(x.slot.startTime) < 13 * 60) },
+    { title: '☀️ الظهيرة والعصر (01:00 م - 05:00 م)', slots: evaluatedSlots.filter(x => timeStringToMinutes(x.slot.startTime) >= 13 * 60 && timeStringToMinutes(x.slot.startTime) < 17 * 60) },
+    { title: '🌅 الفترة المسائية (05:00 م - 09:00 م)', slots: evaluatedSlots.filter(x => timeStringToMinutes(x.slot.startTime) >= 17 * 60 && timeStringToMinutes(x.slot.startTime) < 21 * 60) },
+    { title: '💡 الفترة الليلية (09:00 م - 01:00 ص)', slots: evaluatedSlots.filter(x => timeStringToMinutes(x.slot.startTime) >= 21 * 60) }
   ];
 
   let html = '';
