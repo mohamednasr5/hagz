@@ -1414,3 +1414,29 @@ body {
 @media(max-width:1000px){.pitch-info-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:640px){.telegram-premium-card{align-items:flex-start;padding:22px 18px;gap:13px;border-radius:20px}.telegram-premium-icon{width:48px;height:48px;flex-basis:48px;font-size:1.5rem;border-radius:15px}.telegram-premium-copy p{font-size:.83rem}.telegram-premium-button{width:100%;justify-content:center;font-size:.85rem}.pitch-info-section{padding:19px 15px}.pitch-info-grid{grid-template-columns:1fr;gap:12px}.pitch-info-card{min-height:unset;padding:17px}.telegram-premium-orbit{display:none}}
 @media(prefers-reduced-motion:reduce){.telegram-premium-card,.pitch-info-card{animation:none;transition:none}.telegram-premium-orbit{animation:none}}
+
+
+/* Complaints and suggestions contact card */
+.chairman-contact-section{margin:36px 0 32px;perspective:1300px;scroll-margin-top:24px}
+.chairman-contact-card{position:relative;isolation:isolate;overflow:hidden;padding:28px 30px;border-radius:25px;border:1px solid rgba(45,190,145,.28);background:radial-gradient(ellipse at 8% 5%,rgba(16,185,129,.14),transparent 42%),linear-gradient(135deg,rgba(13,38,43,.98),rgba(10,25,39,.98));box-shadow:0 18px 44px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.07);transform-style:preserve-3d;animation:chairmanCardEnter .75s both;transition:transform .35s ease,box-shadow .35s ease}
+.chairman-contact-card:hover{transform:perspective(1100px) rotateX(1deg) translateY(-4px);box-shadow:0 27px 55px rgba(0,0,0,.34),0 0 25px rgba(16,185,129,.09)}
+.chairman-contact-heading{display:flex;align-items:flex-start;gap:15px;position:relative;z-index:1}
+.chairman-contact-icon{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;border-radius:17px;background:rgba(16,185,129,.14);border:1px solid rgba(52,211,153,.22);font-size:1.55rem;box-shadow:0 10px 25px rgba(0,0,0,.18);transform:translateZ(20px)}
+.chairman-contact-heading h3{margin:0 0 7px;color:#f5fffb;font-size:clamp(1.15rem,2vw,1.4rem);font-weight:900}
+.chairman-contact-heading p{margin:0;color:#b4c9c8;font-size:.9rem;line-height:1.9;max-width:850px}
+.chairman-contact-person{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0 17px;padding:16px 18px;border-radius:16px;border:1px solid rgba(148,163,184,.14);background:rgba(255,255,255,.035)}
+.chairman-contact-person span{color:#b5c9c8;font-size:.88rem}
+.chairman-contact-person strong{color:#fff;font-size:1.05rem;font-weight:900}
+.chairman-contact-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.chairman-contact-action{display:flex;align-items:center;gap:13px;min-height:68px;padding:13px 17px;border-radius:16px;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.12);box-shadow:0 9px 20px rgba(0,0,0,.18);transition:transform .25s ease,box-shadow .25s ease,filter .25s ease}
+.chairman-contact-action:hover{transform:translateY(-4px) translateZ(10px);box-shadow:0 16px 30px rgba(0,0,0,.27);filter:brightness(1.08)}
+.chairman-contact-action>span:first-child{font-size:1.55rem}
+.chairman-contact-action small{display:block;margin-bottom:3px;color:rgba(255,255,255,.82);font-size:.75rem}
+.chairman-contact-action bdi{display:block;font-weight:900;font-size:1rem}
+.chairman-call-action{background:linear-gradient(120deg,#1764bd,#174b8c)}
+.chairman-whatsapp-action{background:linear-gradient(120deg,#128b61,#08734f)}
+.chairman-action-arrow{margin-inline-start:auto;font-size:1.25rem}
+.chairman-contact-note{margin:16px 0 0;color:#9eb8b4;font-size:.82rem;text-align:center}
+@keyframes chairmanCardEnter{from{opacity:0;transform:translateY(20px) rotateX(4deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}
+@media(max-width:640px){.chairman-contact-card{padding:21px 16px;border-radius:20px}.chairman-contact-heading{gap:11px}.chairman-contact-heading p{font-size:.82rem}.chairman-contact-actions{grid-template-columns:1fr}.chairman-contact-person{align-items:flex-start;flex-direction:column;gap:5px}.chairman-contact-action{min-height:62px}}
+@media(prefers-reduced-motion:reduce){.chairman-contact-card,.chairman-contact-action{animation:none;transition:none}}
