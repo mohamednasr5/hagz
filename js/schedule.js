@@ -240,7 +240,7 @@ function renderTacticalFormation(evaluatedSlots) {
   const container = document.getElementById('tacticalPitchFormation');
   if (!container) return;
 
-  // Divide all 32 half-hour periods into four readable time bands.
+  // Divide all half-hour periods into four readable time bands.
   const lines = [
     { title: '☀️ الفترة الصباحية (09:00 ص - 01:00 م)', slots: evaluatedSlots.filter(x => timeStringToMinutes(x.slot.startTime) < 13 * 60) },
     { title: '☀️ الظهيرة والعصر (01:00 م - 05:00 م)', slots: evaluatedSlots.filter(x => timeStringToMinutes(x.slot.startTime) >= 13 * 60 && timeStringToMinutes(x.slot.startTime) < 17 * 60) },
