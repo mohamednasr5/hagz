@@ -118,7 +118,7 @@ export function openBookingModal(dateKey, startTime, defaultDuration = 1) {
 
     if (nowMinutes >= adjStartMin) {
       soundFX.playError();
-      showToast('عذراً، هذه الساعة قد مضى وقتها بالفعل اليوم!', 'error');
+      showToast('عذراً، وقت بداية الحجز قد مضى بالفعل اليوم!', 'error');
       return;
     }
   }
@@ -216,7 +216,7 @@ async function handleBookingSubmit(e) {
 
       if (nowMinutes >= adjStartMin) {
         soundFX.playError();
-        showToast('عذراً، هذه الساعة قد مضت بالفعل اليوم ولا يمكن حجزها!', 'error');
+        showToast('عذراً، وقت بداية الحجز قد مضى بالفعل اليوم ولا يمكن حجزه!', 'error');
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
