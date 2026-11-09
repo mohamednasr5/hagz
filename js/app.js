@@ -62,10 +62,14 @@ function initLiveClock() {
   const updateClock = () => {
     if (!clockEl) return;
     const now = getEgyptNow();
-    const hours = String(now.getHours()).padStart(2, '0');
+    let rawH = now.getHours();
+    const period = rawH >= 12 ? 'م' : 'ص';
+    let h12 = rawH % 12;
+    if (h12 === 0) h12 = 12;
+
+    const hours = String(h12).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    const period = now.getHours() >= 12 ? 'م' : 'ص';
     clockEl.textContent = `${hours}:${minutes}:${seconds} ${period}`;
   };
 

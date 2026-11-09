@@ -87,10 +87,13 @@ body {
 .tv-digital-clock {
   font-size: 2.2rem;
   font-weight: 900;
-  font-family: monospace;
+  font-family: var(--font-tv), monospace;
   color: #fff;
-  letter-spacing: 2px;
-  direction: ltr;
+  letter-spacing: 1px;
+  direction: rtl;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .tv-date-tag {

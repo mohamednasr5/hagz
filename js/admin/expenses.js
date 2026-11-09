@@ -67,7 +67,7 @@ export function renderExpensesList(dateKey) {
         </td>
         <td style="font-weight: 800; color: var(--accent-red);">${formatCurrency(amount)}</td>
         <td style="color: #94a3b8; font-size: 0.85rem;">${escapeHtml(item.notes || '-')}</td>
-        <td style="font-size: 0.82rem; color: #64748b;">${new Date(item.createdAt || Date.now()).toLocaleTimeString('ar-EG')}</td>
+        <td style="font-size: 0.82rem; color: #64748b;">${new Date(item.createdAt || Date.now()).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true })}</td>
         <td>
           <button class="btn-action cancel" onclick="window.handleDeleteExpense('${dateKey}', '${id}')">
             🗑️ حذف

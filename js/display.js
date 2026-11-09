@@ -30,10 +30,16 @@ function initClock() {
 
   const update = () => {
     const now = getEgyptNow();
-    const h = String(now.getHours()).padStart(2, '0');
+    let rawH = now.getHours();
+    const period = rawH >= 12 ? 'م' : 'ص';
+    let h12 = rawH % 12;
+    if (h12 === 0) h12 = 12;
+
+    const h = String(h12).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
-    if (clockEl) clockEl.textContent = `${h}:${m}:${s}`;
+
+    if (clockEl) clockEl.textContent = `${h}:${m}:${s} ${period}`;
     if (dateEl) dateEl.textContent = `${getArabicDayName(now)} - ${formatArabicFullDate(now)}`;
   };
 
