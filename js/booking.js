@@ -16,8 +16,7 @@ import {
   formatCurrency, 
   showToast, 
   timeStringToMinutes,
-  populateTimeSelect
-} from './utils.js';
+  populateTimeSelect,\n  findBookingConflict,\n  describeBookingConflict\n} from './utils.js';
 import { soundFX } from './audio-fx.js';
 
 let currentSettings = {
@@ -252,23 +251,10 @@ async function handleBookingSubmit(e) {
     const snapshot = await get(dateBookingsRef);
     const existingBookings = snapshot.val() || {};
 
-    let hasConflict = false;
-    for (const [id, b] of Object.entries(existingBookings)) {
-      if (b.status === 'confirmed' || b.status === 'pending') {
-        const bStartMin = timeStringToMinutes(b.startTime);
-        const bEndMin = bStartMin + (b.durationMinutes || 60);
-
-        // Check if times overlap: (start1 < end2) && (end1 > start2)
-        if (startMinutes < bEndMin && endMinutes > bStartMin) {
-          hasConflict = true;
-          break;
-        }
-      }
-    }
-
-    if (hasConflict) {
+    const conflict = findBookingConflict(startMinutes, endMinutes, existingBookings);
+    if (conflict) {
       soundFX.playError();
-      showToast('عذراً! هذه الفترة متداخلة مع حجز آخر مسجل بالفعل.', 'error');
+      showToast(describeBookingConflict(conflict), 'error');
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
