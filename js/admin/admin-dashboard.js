@@ -26,7 +26,8 @@ import {
   formatTime12H,
   formatSlotRange12H,
   calculateBookingPrice, 
-  timeStringToMinutes, 
+  timeStringToMinutes,
+  populateTimeSelect,
   showToast 
 } from '../utils.js';
 import { calculateDailyFinances, renderDailyFinancialReport } from './finance.js';
