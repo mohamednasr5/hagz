@@ -140,7 +140,7 @@ export function renderSlots() {
       const bDuration = Number(b.durationMinutes) || 60;
       const bEndMin = bStartMin + bDuration;
 
-      if (slotStartMin >= bStartMin && slotStartMin < bEndMin) {
+      if (slotStartMin < bEndMin && slotStartMin + 30 > bStartMin) {
         matchedBooking = b;
         matchedBookingId = id;
         break;
@@ -263,7 +263,7 @@ function renderTacticalFormation(evaluatedSlots) {
 
       let tooltipCustomer = '';
       if (item.matchedBooking) {
-        tooltipCustomer = `👤 ${escapeHtml(item.matchedBooking.customerName || 'محجوز')}`;
+        tooltipCustomer = `👤 ${escapeHtml(item.matchedBooking.customerName || 'محجوز')} • ${Number(item.matchedBooking.durationMinutes) || 60} دقيقة • ${formatTime12H(item.matchedBooking.startTime)} إلى ${formatTime12H(item.matchedBooking.endTime)}`;
       } else {
         tooltipCustomer = `⚡ ${formatCurrency(item.pricing.total)} (انقر للحجز)`;
       }
@@ -339,6 +339,8 @@ function renderCardsGrid(evaluatedSlots) {
             <div class="customer-tag">
               👤 ${escapeHtml(item.matchedBooking.customerName || 'محجوز')}
             </div>
+            <div style="font-size:0.78rem;color:#fca5a5;font-weight:700;">⏱ المدة: ${Number(item.matchedBooking.durationMinutes) || 60} دقيقة</div>
+            <div style="font-size:0.78rem;color:#cbd5e1;">من ${formatTime12H(item.matchedBooking.startTime)} إلى ${formatTime12H(item.matchedBooking.endTime)}</div>
             ${item.matchedBooking.notes ? `<div style="font-size: 0.78rem; color: #94a3b8;">📝 ${escapeHtml(item.matchedBooking.notes)}</div>` : ''}
           ` : `
             <div style="font-size: 0.8rem; color: #94a3b8;">
@@ -389,7 +391,7 @@ function evaluateActiveSpotlightMatch() {
 
     document.getElementById('activeCustomerName').textContent = ongoingBooking.customerName || 'مباراة نشطة';
     document.getElementById('activeMatchTime').textContent = formatSlotRange12H(ongoingBooking.startTime, ongoingBooking.endTime);
-    document.getElementById('activeMatchPeriod').textContent = ongoingBooking.period || 'ملعب خماسي';
+    document.getElementById('activeMatchPeriod').textContent = (ongoingBooking.period || 'ملعب خماسي') + ' • ' + (Number(ongoingBooking.durationMinutes) || 60) + ' دقيقة';
 
     // Register countdown engine
     countdownEngine.register(
