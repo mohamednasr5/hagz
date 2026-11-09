@@ -8,13 +8,20 @@
 
 const https = require('https');
 
-const BOT_TOKEN = '9099414918:AAEw4nqGbWP4pixVcI05olGLTag5H42vkhE';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const RUN_DURATION_MS = Number(process.env.BOT_RUNNER_DURATION_MS || 240000);
+const runStartedAt = Date.now();
 const FIREBASE_DB_BASE = 'https://hagz-a49fa-default-rtdb.firebaseio.com';
 
 let lastUpdateId = 0;
 // Track notified bookings: key = `${id}_${status}` to re-notify on status change
 const notifiedKeys = new Set();
 let botStartTimestamp = Date.now(); // Only notify bookings created AFTER bot starts
+
+if (!BOT_TOKEN) {
+  console.error('Missing TELEGRAM_BOT_TOKEN secret. Add it in GitHub repository Actions secrets.');
+  process.exit(1);
+}
 
 console.log('----------------------------------------------------');
 console.log('🤖 بوت ملعب مركز شباب الأحمدية قيد التشغيل والجاهزية...');
@@ -265,8 +272,11 @@ async function pollTelegramUpdates() {
     }
   }
 
-  // Next poll
-  setTimeout(pollTelegramUpdates, 1000);
+  if (Date.now() - runStartedAt < RUN_DURATION_MS) {
+    setTimeout(pollTelegramUpdates, 1000);
+  } else {
+    console.log('[Bot] Polling window complete; the next scheduled Actions run will restart it.');
+  }
 }
 
 /**
@@ -401,10 +411,36 @@ https://mohamednasr5.github.io/hagz/admin/
     console.error('[Bot] Error in booking notification watcher:', err.message);
   }
 
-  setTimeout(checkBookingNotifications, 10000); // Check every 10 seconds
+  if (Date.now() - runStartedAt < RUN_DURATION_MS) {
+    setTimeout(checkBookingNotifications, 10000);
+  }
 }
 
-// Start bot
-pollTelegramUpdates();
-checkBookingNotifications();
+// GitHub Actions is the sole Telegram update consumer for this deployment.
+async function startBot() {
+  try {
+    const webhookResult = await request(
+      `https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook`,
+      { method: 'POST' },
+      { drop_pending_updates: false }
+    );
+    if (!webhookResult || !webhookResult.ok) {
+      throw new Error('Telegram deleteWebhook failed: ' + JSON.stringify(webhookResult));
+    }
+    console.log('[Bot] Webhook cleared; GitHub Actions long polling is active.');
+  } catch (error) {
+    console.error('[Bot] Could not prepare Telegram polling:', error.message);
+    process.exit(1);
+  }
+
+  pollTelegramUpdates();
+  checkBookingNotifications();
+
+  setTimeout(() => {
+    console.log('[Bot] Scheduled execution window ended. Exiting cleanly.');
+    process.exit(0);
+  }, RUN_DURATION_MS);
+}
+
+startBot();
 
