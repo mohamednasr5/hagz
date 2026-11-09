@@ -14,6 +14,7 @@ import {
 } from './utils.js';
 import { setPitchSettings, initBookingModal } from './booking.js';
 import { loadScheduleForDate } from './schedule.js';
+import { soundFX } from './audio-fx.js';
 
 let currentDate = getEgyptNow();
 let deferredPrompt = null;
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * Switch view between Tactical Pitch Formation and Cards List
  */
 window.switchScheduleView = function(view) {
+  soundFX.playClick();
   const pitchContainer = document.getElementById('pitchFormationContainer');
   const cardsContainer = document.getElementById('slotsContainer');
   const pitchBtn = document.getElementById('viewTogglePitchBtn');
@@ -101,6 +103,7 @@ function initDateNavigator() {
 
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
+      soundFX.playClick();
       currentDate.setDate(currentDate.getDate() - 1);
       updateDateUI();
     });
@@ -108,6 +111,7 @@ function initDateNavigator() {
 
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
+      soundFX.playClick();
       currentDate.setDate(currentDate.getDate() + 1);
       updateDateUI();
     });
@@ -115,6 +119,7 @@ function initDateNavigator() {
 
   if (todayBtn) {
     todayBtn.addEventListener('click', () => {
+      soundFX.playClick();
       currentDate = getEgyptNow();
       updateDateUI();
     });

@@ -1,92 +1,188 @@
-/* animations.css - Sports Stadium Keyframes & Motion */
+﻿/* ========================================================
+   animations.css — Ahmadiah Pitch Manager
+   Professional Sports Stadium Motion & FX System
+   ======================================================== */
 
+/* ─── Core Pulse Animations ─────────────────────────────── */
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.8), inset 0 0 15px rgba(16, 185, 129, 0.4);
-  }
+  0%, 100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
+  50%       { box-shadow: 0 0 24px rgba(16, 185, 129, 1), 0 0 40px rgba(16, 185, 129, 0.4); }
 }
 
 @keyframes pulseRed {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
-  }
+  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); opacity: 1; }
+  50%       { box-shadow: 0 0 24px rgba(239, 68, 68, 1), 0 0 40px rgba(239, 68, 68, 0.5); opacity: 0.85; }
 }
 
 @keyframes pulseYellow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
-  }
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
+  50%       { box-shadow: 0 0 24px rgba(245, 158, 11, 1), 0 0 40px rgba(245, 158, 11, 0.4); }
 }
 
+@keyframes pulseOrange {
+  0%, 100% { box-shadow: 0 0 8px rgba(249, 115, 22, 0.5); }
+  50%       { box-shadow: 0 0 24px rgba(249, 115, 22, 1), 0 0 40px rgba(249, 115, 22, 0.4); }
+}
+
+/* ─── Live Dot Blink ────────────────────────────────────── */
+@keyframes liveDotBlink {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* ─── Background Ambience ───────────────────────────────── */
+@keyframes bgAmbience {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Light Sweep (Stadium Floodlight FX) ──────────────── */
 @keyframes stadiumLightSweep {
-  0% {
-    transform: rotate(-15deg) translateX(-100%);
-  }
-  100% {
-    transform: rotate(-15deg) translateX(300%);
-  }
+  0%   { transform: rotate(-20deg) translateX(-150%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.6; }
+  100% { transform: rotate(-20deg) translateX(400%);  opacity: 0; }
 }
 
+/* ─── Entry Animations ──────────────────────────────────── */
 @keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(28px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(60px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
-@keyframes countdownTicking {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-  100% { transform: scale(1); }
+@keyframes slideInRight {
+  from { transform: translateX(60px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.6) rotate(-8deg); opacity: 0; }
+  to   { transform: scale(1)   rotate(0deg);  opacity: 1; }
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+  70%  { transform: scale(1.1) rotate(2deg);  opacity: 1; }
+  100% { transform: scale(1)   rotate(0deg);  opacity: 1; }
+}
+
+/* ─── Shimmer Skeleton ──────────────────────────────────── */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-.anim-pulse-glow {
-  animation: pulseGlow 2.5s infinite ease-in-out;
+/* ─── Countdown Urgency ─────────────────────────────────── */
+@keyframes countdownTicking {
+  0%   { transform: scale(1);    color: var(--accent-red); }
+  50%  { transform: scale(1.06); color: #fca5a5; }
+  100% { transform: scale(1);    color: var(--accent-red); }
 }
 
-.anim-pulse-red {
-  animation: pulseRed 2s infinite ease-in-out;
+@keyframes urgentFlash {
+  0%, 100% { background: rgba(239, 68, 68, 0.1); }
+  50%       { background: rgba(239, 68, 68, 0.35); }
 }
 
-.anim-pulse-yellow {
-  animation: pulseYellow 2s infinite ease-in-out;
+/* ─── Success Flash ─────────────────────────────────────── */
+@keyframes successFlash {
+  0%   { box-shadow: 0 0 0   rgba(16, 185, 129, 0); }
+  25%  { box-shadow: 0 0 60px rgba(16, 185, 129, 0.9); }
+  50%  { box-shadow: 0 0 120px rgba(16, 185, 129, 0.6); }
+  100% { box-shadow: 0 0 0   rgba(16, 185, 129, 0); }
 }
 
-.anim-countdown {
-  animation: countdownTicking 1s infinite ease-in-out;
+@keyframes successRipple {
+  0%   { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0;   }
 }
+
+/* ─── Pitch Node Hover Bounce ───────────────────────────── */
+@keyframes nodeBounce {
+  0%   { transform: translateY(0)    scale(1);    }
+  30%  { transform: translateY(-10px) scale(1.12); }
+  60%  { transform: translateY(-4px)  scale(1.05); }
+  100% { transform: translateY(0)    scale(1);    }
+}
+
+/* ─── Header Logo Glow ──────────────────────────────────── */
+@keyframes logoGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5)); }
+  50%       { filter: drop-shadow(0 0 18px rgba(16, 185, 129, 1)); }
+}
+
+/* ─── Grass Wave ────────────────────────────────────────── */
+@keyframes grassWave {
+  0%   { background-position: 0 0; }
+  100% { background-position: 60px 0; }
+}
+
+/* ─── Floating orbs ─────────────────────────────────────── */
+@keyframes floatOrb {
+  0%   { transform: translate(0, 0)   scale(1);   opacity: 0.15; }
+  33%  { transform: translate(30px, -50px) scale(1.1); opacity: 0.25; }
+  66%  { transform: translate(-20px, -90px) scale(0.9); opacity: 0.1; }
+  100% { transform: translate(0, 0)   scale(1);   opacity: 0.15; }
+}
+
+/* ─── Utility Classes ───────────────────────────────────── */
+.anim-pulse-glow    { animation: pulseGlow    2.4s infinite ease-in-out; }
+.anim-pulse-red     { animation: pulseRed     1.8s infinite ease-in-out; }
+.anim-pulse-yellow  { animation: pulseYellow  2s   infinite ease-in-out; }
+.anim-pulse-orange  { animation: pulseOrange  2s   infinite ease-in-out; }
+.anim-live-dot      { animation: liveDotBlink 1.2s infinite ease-in-out; }
+.anim-countdown     { animation: countdownTicking 1s infinite ease-in-out; }
+.anim-urgent        { animation: urgentFlash  0.9s infinite ease-in-out; }
+.anim-logo-glow     { animation: logoGlow     3s   infinite ease-in-out; }
+.anim-pop-in        { animation: popIn        0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+.anim-scale-in      { animation: scaleIn      0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+.anim-slide-up      { animation: slideUp      0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-fade-in       { animation: fadeIn       0.4s ease both; }
 
 .shimmer-bg {
-  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.03) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.03) 75%
+  );
   background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  animation: shimmer 1.8s infinite;
+}
+
+/* Stagger delays for formation nodes */
+.stagger-child:nth-child(1)  { animation-delay: 0.05s; }
+.stagger-child:nth-child(2)  { animation-delay: 0.10s; }
+.stagger-child:nth-child(3)  { animation-delay: 0.15s; }
+.stagger-child:nth-child(4)  { animation-delay: 0.20s; }
+.stagger-child:nth-child(5)  { animation-delay: 0.25s; }
+.stagger-child:nth-child(6)  { animation-delay: 0.30s; }
+.stagger-child:nth-child(7)  { animation-delay: 0.35s; }
+.stagger-child:nth-child(8)  { animation-delay: 0.40s; }
+.stagger-child:nth-child(9)  { animation-delay: 0.45s; }
+.stagger-child:nth-child(10) { animation-delay: 0.50s; }
+.stagger-child:nth-child(11) { animation-delay: 0.55s; }
+.stagger-child:nth-child(12) { animation-delay: 0.60s; }
+.stagger-child:nth-child(13) { animation-delay: 0.65s; }
+.stagger-child:nth-child(14) { animation-delay: 0.70s; }
+.stagger-child:nth-child(15) { animation-delay: 0.75s; }
+.stagger-child:nth-child(16) { animation-delay: 0.80s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

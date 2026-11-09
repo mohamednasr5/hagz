@@ -17,6 +17,7 @@ import {
   showToast, 
   timeStringToMinutes 
 } from './utils.js';
+import { soundFX } from './audio-fx.js';
 
 let currentSettings = {
   pitchName: 'ملعب مركز شباب الأحمدية الخماسي',
@@ -85,10 +86,42 @@ export function openBookingModal(dateKey, startTime, defaultDuration = 1) {
   if (!modalOverlay) return;
 
   if (currentSettings.bookingEnabled === false) {
+    soundFX.playError();
     showToast('الحجز معطل حالياً من قِبل إدارة الملعب.', 'error');
     return;
   }
 
+  // Verify Date is not in the past
+  const todayKey = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Cairo',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+
+  if (dateKey < todayKey) {
+    soundFX.playError();
+    showToast('عذراً، هذا اليوم قد انتهى بالفعل ولا يمكن الحجز فيه!', 'error');
+    return;
+  }
+
+  // If today, verify start time is not already in the past
+  if (dateKey === todayKey) {
+    const cairoStr = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Africa/Cairo',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    }).format(new Date());
+    const [ch, cm] = cairoStr.split(':').map(Number);
+    const nowMinutes = ch * 60 + cm;
+    const startMinutes = timeStringToMinutes(startTime);
+    const adjStartMin = startMinutes === 0 ? 24 * 60 : startMinutes;
+
+    if (nowMinutes >= adjStartMin) {
+      soundFX.playError();
+      showToast('عذراً، هذه الساعة قد مضى وقتها بالفعل اليوم!', 'error');
+      return;
+    }
+  }
+
+  soundFX.playModalOpen();
   document.getElementById('bookingDate').value = dateKey;
   document.getElementById('bookingDateDisplay').textContent = dateKey;
   document.getElementById('bookingStartTime').value = startTime;
@@ -144,12 +177,50 @@ async function handleBookingSubmit(e) {
     const notes = document.getElementById('bookingNotes').value.trim();
 
     if (!customerName) {
+      soundFX.playError();
       showToast('يرجى إدخال اسم العميل أو اسم الفريق', 'error');
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
       }
       return;
+    }
+
+    // ── Check past date or past hour ───────────────────────────────────────
+    const todayKey = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Cairo',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+
+    if (date < todayKey) {
+      soundFX.playError();
+      showToast('عذراً، لا يمكن تسجيل حجز لتاريخ ماضٍ انتهى!', 'error');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+      return;
+    }
+
+    if (date === todayKey) {
+      const cairoStr = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Africa/Cairo',
+        hour: '2-digit', minute: '2-digit', hour12: false
+      }).format(new Date());
+      const [ch, cm] = cairoStr.split(':').map(Number);
+      const nowMinutes = ch * 60 + cm;
+      const startMinutesVal = timeStringToMinutes(startTime);
+      const adjStartMin = startMinutesVal === 0 ? 24 * 60 : startMinutesVal;
+
+      if (nowMinutes >= adjStartMin) {
+        soundFX.playError();
+        showToast('عذراً، هذه الساعة قد مضت بالفعل اليوم ولا يمكن حجزها!', 'error');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+        return;
+      }
     }
 
     const startMinutes = timeStringToMinutes(startTime);
@@ -188,6 +259,7 @@ async function handleBookingSubmit(e) {
     }
 
     if (hasConflict) {
+      soundFX.playError();
       showToast('عذراً! هذه الفترة متداخلة مع حجز آخر مسجل بالفعل.', 'error');
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -220,6 +292,10 @@ async function handleBookingSubmit(e) {
     };
 
     await set(newBookingRef, bookingData);
+
+    // Celebration audio-visual effects
+    soundFX.playWhistle();
+    soundFX.playSuccess();
 
     // Close modal & notify
     document.getElementById('bookingModal').classList.remove('active');

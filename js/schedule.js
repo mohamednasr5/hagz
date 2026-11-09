@@ -15,6 +15,7 @@ import {
 } from './utils.js';
 import { openBookingModal, getPitchSettings } from './booking.js';
 import { countdownEngine } from './countdown.js';
+import { soundFX } from './audio-fx.js';
 
 let activeDateListenerUnsubscribe = null;
 let currentDayBookings = {};
@@ -446,11 +447,13 @@ function escapeHtml(text) {
 
 // Global click handler exposed for slot cards
 window.handleSlotBookClick = function(dateKey, startTime) {
+  soundFX.playClick();
   openBookingModal(dateKey, startTime, 1);
 };
 
 // Global click handler for non-available circles on tactical pitch
 window.handleCircleInfoClick = function(timeStr, statusLabel, customerName) {
+  soundFX.playError();
   const detail = customerName ? ` (${customerName})` : '';
   const { showToast } = import('./utils.js').then(u => {
     u.showToast(`موعد الساعة ${timeStr}: ${statusLabel}${detail}`, statusLabel.includes('محجوز') ? 'error' : 'info');

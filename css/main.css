@@ -551,10 +551,6 @@ body {
   flex-direction: column;
   gap: 2px;
 }
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
 .pricing-pill strong {
   color: var(--accent-green);
@@ -1229,3 +1225,34 @@ body {
   color: #7dd3fc;
   text-decoration: underline;
 }
+
+/* Interactive Click Ripple & Audio-Visual Enhancements */
+.fx-click-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: rippleFx 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: rgba(16, 185, 129, 0.45);
+  pointer-events: none;
+}
+
+@keyframes rippleFx {
+  to {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+/* Enhanced Stadium Glassmorphism Glows */
+.tactical-pitch-board {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(16, 185, 129, 0.15), inset 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.player-slot-circle {
+  transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.22s ease;
+}
+
+.player-slot-circle:active {
+  transform: scale(0.92) !important;
+}
+
