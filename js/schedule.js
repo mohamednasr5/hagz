@@ -67,7 +67,7 @@ export function loadScheduleForDate(dateKey) {
 function getDaySlotHours() {
   const hours = [];
   // Standard operating hours: from 09:00 to 01:00 AM (next day)
-  for (let minute = 9 * 60; minute <= 24 * 60; minute += 30) {
+  for (let minute = 9 * 60; minute < 25 * 60; minute += 30) {
     const start = minute % 1440;
     const end = (minute + 30) % 1440;
     const toTime = value => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
