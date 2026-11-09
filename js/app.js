@@ -20,6 +20,7 @@ let currentDate = getEgyptNow();
 let deferredPrompt = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+  updateCopyrightYear();
   initLiveClock();
   initDateNavigator();
   initSettingsListener();
@@ -249,4 +250,15 @@ function initNetworkListeners() {
   window.addEventListener('online', updateStatus);
   window.addEventListener('offline', updateStatus);
   updateStatus();
+}
+
+
+/**
+ * Keep the footer copyright year synchronized with the visitor's current year.
+ */
+function updateCopyrightYear() {
+  const yearElement = document.getElementById('currentYear');
+  if (yearElement) {
+    yearElement.textContent = String(new Date().getFullYear());
+  }
 }
