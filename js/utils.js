@@ -100,29 +100,6 @@ export function populateTimeSelect(select, selectedValue = '09:00') {
   select.value = selectedValue;
   if (select.value !== selectedValue) select.selectedIndex = 0;
 }
-/** Build a half-hour time list with canonical 24-hour values and 12-hour labels. */
-export function buildTimeOptions(startHour = 9, endHour = 24, stepMinutes = 30) {
-  const options = [];
-  for (let minute = startHour * 60; minute <= endHour * 60; minute += stepMinutes) {
-    const normalized = minute % 1440;
-    const hour = Math.floor(normalized / 60);
-    const mins = normalized % 60;
-    const value = `${String(hour).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-    options.push({ value, label: formatTime12H(value) });
-  }
-  return options;
-}
-
-export function populateTimeSelect(select, selectedValue = '09:00') {
-  if (!select) return;
-  const options = buildTimeOptions(9, 24, 30);
-  select.innerHTML = options.map(({ value, label }) =>
-    `<option value="${value}">${label}</option>`
-  ).join('');
-  select.value = selectedValue;
-  if (select.value !== selectedValue) select.selectedIndex = 0;
-}
-
 /**
  * Converts 24-hour time "14:00" or 14 to Arabic 12-hour display "02:00 م"
  */
