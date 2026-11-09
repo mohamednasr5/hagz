@@ -2,7 +2,8 @@ name: Ahmadiah Telegram Bot
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    # GitHub Actions cron uses UTC; this starts a fresh five-hour worker window.
+    - cron: "0 */5 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -14,12 +15,13 @@ permissions:
 
 jobs:
   telegram-bot:
-    name: Run Telegram bot polling window
+    name: Keep Telegram bot running and recover crashes
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Five-hour bot window plus setup/retry/cleanup margin (GitHub maximum is 6 hours).
+    timeout-minutes: 350
     env:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      BOT_RUNNER_DURATION_MS: "240000"
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -30,6 +32,7 @@ jobs:
           node-version: "20"
 
       - name: Validate required secret
+        shell: bash
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
             echo "::error::Missing TELEGRAM_BOT_TOKEN. Add it under Settings > Secrets and variables > Actions."
@@ -39,5 +42,24 @@ jobs:
       - name: Validate bot JavaScript
         run: node --check bot-runner.js
 
-      - name: Start bot polling and booking notifications
-        run: node bot-runner.js
+      - name: Run bot for five hours and restart it after unexpected exits
+        shell: bash
+        run: |
+          WINDOW_SECONDS=18000
+          END_AT=$((SECONDS + WINDOW_SECONDS))
+
+          while [ "$SECONDS" -lt "$END_AT" ]; do
+            REMAINING_SECONDS=$((END_AT - SECONDS))
+            export BOT_RUNNER_DURATION_MS=$((REMAINING_SECONDS * 1000))
+
+            echo "[Actions] Starting Telegram bot. Remaining window: ${REMAINING_SECONDS}s"
+            node bot-runner.js
+            EXIT_CODE=$?
+
+            if [ "$SECONDS" -lt "$END_AT" ]; then
+              echo "::warning::Telegram bot process exited (code $EXIT_CODE). Restarting in 15 seconds."
+              sleep 15
+            fi
+          done
+
+          echo "[Actions] Five-hour worker window completed."
