@@ -80,7 +80,7 @@ export function formatSlotRange12H(startTime, endTime) {
 }
 
 /** Create 30-minute choices; values stay canonical HH:mm while labels use 12-hour time. */
-export function buildTimeOptions(startHour = 9, endHour = 24, stepMinutes = 30) {
+export function buildTimeOptions(startHour = 9, endHour = 24.5, stepMinutes = 30) {
   const options = [];
   for (let minute = startHour * 60; minute <= endHour * 60; minute += stepMinutes) {
     const normalized = minute % 1440;
