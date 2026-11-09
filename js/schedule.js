@@ -21,6 +21,15 @@ let activeDateListenerUnsubscribe = null;
 let currentDayBookings = {};
 let selectedDateKey = '';
 
+/* Keep the live pitch map and active-match panel aligned with the Cairo clock,
+   including queued bookings that become active without a database write. */
+setInterval(() => {
+  if (selectedDateKey && isDateToday(selectedDateKey)) {
+    renderSlots();
+    evaluateActiveSpotlightMatch();
+  }
+}, 15000);
+
 /**
  * Loads schedule for a specific date
  */
