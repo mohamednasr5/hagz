@@ -214,46 +214,39 @@
       </div>
     </section>
 
-    <!-- Telegram Notifications Banner -->
-    <section style="margin-top: 36px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(13, 27, 42, 0.85)); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 14px;">
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <div style="background: rgba(59, 130, 246, 0.2); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-          📢
+    <!-- Premium Telegram Subscription Card -->
+    <section class="telegram-premium-wrap" aria-labelledby="telegramPremiumTitle">
+      <div class="telegram-premium-card">
+        <div class="telegram-premium-glow" aria-hidden="true"></div>
+        <div class="telegram-premium-icon" aria-hidden="true">📢</div>
+        <div class="telegram-premium-copy">
+          <span class="premium-kicker">AHMADIAH PITCH • LIVE UPDATES</span>
+          <h3 id="telegramPremiumTitle">اشترك في إشعارات بوت تيليجرام الملعب</h3>
+          <p>تصلك تنبيهات فورية بكل حجز مؤكد، والمواعيد الشاغرة، وتنبيهات انتهاء الوقت مباشرة على هاتفك.</p>
+          <a href="https://t.me/AhmadiahPitchBot" target="_blank" rel="noopener noreferrer" class="telegram-premium-button">
+            <span>🚀 فتح البوت والاشتراك مجاناً</span>
+            <small>@AhmadiahPitchBot</small>
+            <span class="telegram-button-arrow" aria-hidden="true">←</span>
+          </a>
         </div>
-        <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800;">اشترك في إشعارات بوت تيليجرام للملعب</h3>
-          <p style="font-size: 0.88rem; color: #94a3b8;">تصلك تنبيهات فورية بكل حجز مؤكد، والمواعيد الشاغرة، وتنبيهات انتهاء الوقت مباشرة على هاتفك.</p>
-        </div>
-      </div>
-      <div>
-        <a href="https://t.me/AhmadiahPitchBot" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background: #2563eb; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-          <span>🚀 فتح البوت والاشتراك مجاناً (@AhmadiahPitchBot)</span>
-        </a>
+        <div class="telegram-premium-orbit" aria-hidden="true">✦</div>
       </div>
     </section>
 
-    <!-- Pitch Information Section -->
-    <section id="section-info" style="margin-top: 36px; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 24px;">
-      <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 16px; border-bottom: 1px solid var(--border-glass); padding-bottom: 10px;">
-        ℹ️ معلومات وقواعد حجز ملعب مركز شباب الأحمدية
-      </h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; font-size: 0.92rem; color: #cbd5e1;">
-        <div style="display: flex; gap: 10px;">
-          <span>📍</span>
-          <div><strong>الموقع:</strong> محافظة الدقهلية - مركز المنزلة - مركز شباب قرية الأحمدية.</div>
+    <!-- Premium 3D Pitch Information Cards -->
+    <section id="section-info" class="pitch-info-section" aria-labelledby="pitchInfoTitle">
+      <div class="pitch-info-heading">
+        <span class="pitch-info-heading-icon" aria-hidden="true">ℹ️</span>
+        <div>
+          <span class="premium-kicker">KNOW BEFORE YOU PLAY</span>
+          <h3 id="pitchInfoTitle">معلومات وقواعد حجز ملعب مركز شباب الأحمدية</h3>
         </div>
-        <div style="display: flex; gap: 10px;">
-          <span>💡</span>
-          <div><strong>الإضاءة:</strong> كشافات LED ليد ليلية قوية عالية الوضوح تغطي كامل مساحة الملعب.</div>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <span>⚽</span>
-          <div><strong>الكرات والتجهيزات:</strong> تتوفر كرات ومستلزمات المباريات مع الإدارة عند الطلب.</div>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <span>⏱️</span>
-          <div><strong>الانضباط في الوقت:</strong> يرجى الحضور قبل الموعد بـ 10 دقائق لضمان الاستفادة الكاملة من الوقت.</div>
-        </div>
+      </div>
+      <div class="pitch-info-grid">
+        <article class="pitch-info-card pitch-card-location"><span class="pitch-card-icon" aria-hidden="true">📍</span><div><h4>الموقع</h4><p>محافظة الدقهلية - مركز المنزلة - مركز شباب قرية الأحمدية.</p></div><span class="pitch-card-index">01</span></article>
+        <article class="pitch-info-card pitch-card-lighting"><span class="pitch-card-icon" aria-hidden="true">💡</span><div><h4>الإضاءة</h4><p>كشافات LED ليلية قوية عالية الوضوح تغطي كامل مساحة الملعب.</p></div><span class="pitch-card-index">02</span></article>
+        <article class="pitch-info-card pitch-card-equipment"><span class="pitch-card-icon" aria-hidden="true">⚽</span><div><h4>الكرات والتجهيزات</h4><p>تتوفر كرات ومستلزمات المباريات مع الإدارة عند الطلب.</p></div><span class="pitch-card-index">03</span></article>
+        <article class="pitch-info-card pitch-card-time"><span class="pitch-card-icon" aria-hidden="true">⏱️</span><div><h4>الانضباط في الوقت</h4><p>يرجى الحضور قبل الموعد بـ 10 دقائق لضمان الاستفادة الكاملة من الوقت.</p></div><span class="pitch-card-index">04</span></article>
       </div>
     </section>
 

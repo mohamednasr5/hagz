@@ -1377,3 +1377,40 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .player-slot-circle { animation: none !important; }
 }
+
+
+/* ── Premium 3D Telegram + pitch information cards ── */
+.telegram-premium-wrap, .pitch-info-section { margin-top:36px; perspective:1400px; }
+.telegram-premium-card { position:relative; isolation:isolate; overflow:hidden; display:flex; align-items:center; gap:22px; min-height:190px; padding:30px 34px; border-radius:26px; border:1px solid rgba(79,142,255,.34); background:radial-gradient(ellipse at 12% 10%,rgba(42,104,232,.24),transparent 42%),linear-gradient(120deg,#102344 0%,#0d1b2a 72%); box-shadow:0 18px 44px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08); transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s ease; animation:pitchCardEnter .8s both,pitchCardFloat 7s ease-in-out 1s infinite; }
+.telegram-premium-card:hover { transform:rotateX(2deg) rotateY(-2deg) translateY(-7px); box-shadow:0 30px 65px rgba(0,0,0,.4),0 0 32px rgba(59,130,246,.15); }
+.telegram-premium-glow { position:absolute; width:300px; height:300px; border-radius:50%; left:-100px; top:-160px; background:rgba(45,115,255,.2); filter:blur(55px); z-index:-1; }
+.telegram-premium-icon { flex:0 0 68px; width:68px; height:68px; display:grid; place-items:center; border-radius:22px; font-size:2rem; background:linear-gradient(145deg,rgba(67,126,255,.3),rgba(22,48,91,.8)); border:1px solid rgba(125,170,255,.28); box-shadow:0 12px 28px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.16); transform:translateZ(34px); }
+.telegram-premium-copy { position:relative; z-index:1; flex:1; transform:translateZ(24px); }
+.premium-kicker { display:block; margin-bottom:8px; color:#83aefb; font-size:.66rem; font-weight:800; letter-spacing:.16em; }
+.telegram-premium-copy h3 { margin:0 0 8px; color:#f8fbff; font-size:clamp(1.15rem,2.3vw,1.55rem); font-weight:900; }
+.telegram-premium-copy p { margin:0 0 18px; color:#a9bad2; line-height:1.8; font-size:.92rem; }
+.telegram-premium-button { position:relative; display:inline-flex; align-items:center; gap:10px; flex-wrap:wrap; padding:13px 18px; border-radius:14px; color:#fff; text-decoration:none; font-weight:850; background:linear-gradient(115deg,#3478ff,#2054d7); box-shadow:0 9px 24px rgba(37,99,235,.3),inset 0 1px 0 rgba(255,255,255,.22); transition:transform .25s ease,box-shadow .25s ease; }
+.telegram-premium-button:hover { transform:translateY(-3px) translateZ(12px); box-shadow:0 15px 32px rgba(37,99,235,.42); }
+.telegram-premium-button small { color:#dce8ff; font-size:.75rem; direction:ltr; }
+.telegram-button-arrow { font-size:1.15rem; margin-inline-start:4px; }
+.telegram-premium-orbit { position:absolute; left:7%; top:18%; color:rgba(130,173,255,.55); font-size:2rem; animation:pitchOrbit 8s linear infinite; }
+.pitch-info-section { padding:26px; border:1px solid rgba(148,163,184,.15); border-radius:26px; background:linear-gradient(145deg,rgba(15,29,45,.96),rgba(9,21,34,.96)); box-shadow:0 18px 45px rgba(0,0,0,.22); }
+.pitch-info-heading { display:flex; align-items:center; gap:14px; padding-bottom:18px; margin-bottom:20px; border-bottom:1px solid rgba(148,163,184,.15); }
+.pitch-info-heading-icon { width:48px; height:48px; display:grid; place-items:center; border-radius:16px; background:rgba(59,130,246,.14); font-size:1.45rem; }
+.pitch-info-heading h3 { margin:0; color:#f5f8ff; font-size:clamp(1.05rem,2vw,1.35rem); font-weight:900; }
+.pitch-info-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+.pitch-info-card { position:relative; display:flex; align-items:flex-start; gap:13px; min-height:150px; padding:20px 17px; overflow:hidden; border-radius:20px; border:1px solid rgba(148,163,184,.16); background:linear-gradient(145deg,rgba(23,42,62,.96),rgba(13,28,44,.96)); box-shadow:0 12px 25px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.06); transform-style:preserve-3d; transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease; animation:pitchCardEnter .7s both; }
+.pitch-info-card:nth-child(2){animation-delay:.1s}.pitch-info-card:nth-child(3){animation-delay:.2s}.pitch-info-card:nth-child(4){animation-delay:.3s}
+.pitch-info-card::after { content:""; position:absolute; inset:auto -35px -65px auto; width:130px; height:130px; border-radius:50%; background:rgba(59,130,246,.08); filter:blur(2px); transition:transform .4s ease; }
+.pitch-info-card:hover { transform:perspective(900px) rotateX(4deg) rotateY(-4deg) translateY(-8px) translateZ(8px); border-color:rgba(96,165,250,.48); box-shadow:0 24px 42px rgba(0,0,0,.34),0 0 22px rgba(59,130,246,.09); }
+.pitch-info-card:hover::after { transform:scale(1.5); }
+.pitch-card-icon { flex:0 0 42px; width:42px; height:42px; display:grid; place-items:center; border-radius:13px; font-size:1.35rem; background:rgba(59,130,246,.13); transform:translateZ(22px); }
+.pitch-info-card h4 { margin:2px 0 8px; color:#f3f7ff; font-size:.98rem; font-weight:850; }
+.pitch-info-card p { margin:0; color:#b8c6d8; font-size:.84rem; line-height:1.85; }
+.pitch-card-index { position:absolute; left:14px; bottom:10px; color:rgba(148,163,184,.24); font-size:.72rem; font-weight:900; letter-spacing:.08em; }
+@keyframes pitchCardEnter { from { opacity:0; transform:translateY(22px) rotateX(5deg); } to { opacity:1; transform:translateY(0) rotateX(0); } }
+@keyframes pitchCardFloat { 0%,100% { translate:0 0; } 50% { translate:0 -3px; } }
+@keyframes pitchOrbit { to { transform:rotate(360deg); } }
+@media(max-width:1000px){.pitch-info-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:640px){.telegram-premium-card{align-items:flex-start;padding:22px 18px;gap:13px;border-radius:20px}.telegram-premium-icon{width:48px;height:48px;flex-basis:48px;font-size:1.5rem;border-radius:15px}.telegram-premium-copy p{font-size:.83rem}.telegram-premium-button{width:100%;justify-content:center;font-size:.85rem}.pitch-info-section{padding:19px 15px}.pitch-info-grid{grid-template-columns:1fr;gap:12px}.pitch-info-card{min-height:unset;padding:17px}.telegram-premium-orbit{display:none}}
+@media(prefers-reduced-motion:reduce){.telegram-premium-card,.pitch-info-card{animation:none;transition:none}.telegram-premium-orbit{animation:none}}
