@@ -294,8 +294,7 @@ async function checkBookingNotifications() {
 
     const subscribersData = await request(`${FIREBASE_DB_BASE}/telegramSubscribers.json`) || {};
     const subscriberIds = Object.keys(subscribersData);
-    if (!subscriberIds.length) return;
-
+    if (subscriberIds.length) {
     for (const dateKey of [todayKey, tomorrowKey]) {
       const bookings = await request(`${FIREBASE_DB_BASE}/bookings/${dateKey}.json`) || {};
       if (!bookings || typeof bookings !== 'object') continue;
@@ -364,6 +363,7 @@ ${base}
           }
         }
       }
+    }
     }
   } catch (err) {
     console.error('[Bot] Booking notification watcher error:', err.message);
