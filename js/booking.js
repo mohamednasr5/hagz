@@ -118,7 +118,7 @@ export function openBookingModal(dateKey, startTime, defaultDuration = 1) {
     const startMinutes = timeStringToMinutes(startTime);
     const adjStartMin = startMinutes === 0 ? 24 * 60 : startMinutes;
 
-    if (nowMinutes >= adjStartMin) {
+    if (nowMinutes >= startMinutes) {
       soundFX.playError();
       showToast('عذراً، وقت بداية الحجز قد مضى بالفعل اليوم!', 'error');
       return;
@@ -214,9 +214,9 @@ async function handleBookingSubmit(e) {
       const [ch, cm] = cairoStr.split(':').map(Number);
       const nowMinutes = ch * 60 + cm;
       const startMinutesVal = timeStringToMinutes(startTime);
-      const adjStartMin = startMinutesVal === 0 ? 24 * 60 : startMinutesVal;
+  
 
-      if (nowMinutes >= adjStartMin) {
+      if (nowMinutes >= startMinutesVal) {
         soundFX.playError();
         showToast('عذراً، وقت بداية الحجز قد مضى بالفعل اليوم ولا يمكن حجزه!', 'error');
         if (submitBtn) {
