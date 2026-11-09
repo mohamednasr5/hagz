@@ -102,6 +102,8 @@
             <span style="font-size: 0.85rem; color: var(--text-muted);">التاريخ:</span>
             <input type="date" id="adminDateSelect" class="form-input" style="padding: 6px 12px; font-size: 0.88rem;">
           </div>
+          <button id="btnBookFromNow" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem; background: linear-gradient(135deg,#059669,#10b981);">⚡ حجز من الآن</button>
+          <button id="btnBookNext" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem; background: linear-gradient(135deg,#2563eb,#38bdf8);">⏭ الحجز التالي</button>
           <button id="btnOpenManualBookingModal" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem;">
             + إضافة حجز يدوي
           </button>
@@ -442,6 +444,35 @@
   </div>
 
   <!-- Manual Booking Modal -->
+  <div id="liveBookingModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="liveBookingTitle">حجز فوري</h2>
+        <button type="button" id="closeLiveBookingModal" class="modal-close-btn">&times;</button>
+      </div>
+      <form id="liveBookingForm">
+        <div class="modal-body">
+          <input type="hidden" id="liveBookingMode" value="now">
+          <p id="liveBookingStartHint" style="color:var(--accent-green);font-weight:700;">سيبدأ الحجز من توقيت القاهرة الحالي.</p>
+          <div class="form-group">
+            <label for="liveBookingCustomer">اسم العميل أو الفريق</label>
+            <input id="liveBookingCustomer" class="form-input" placeholder="حجز مباشر" maxlength="80">
+          </div>
+          <div class="form-group">
+            <label for="liveBookingDuration">مدة الحجز بالدقائق</label>
+            <input id="liveBookingDuration" class="form-input" type="number" min="1" max="720" step="1" value="60" required>
+            <small class="field-hint">يمكنك إدخال أي مدة بالدقائق، مثل 45 أو 60 أو 90 أو 120.</small>
+          </div>
+          <p style="color:var(--text-muted);font-size:.85rem;">سيحسب النظام موعد الانتهاء والسعر تلقائيًا، ويتحقق من عدم تعارض الحجز.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancelLiveBookingModal" class="btn-secondary">إلغاء</button>
+          <button type="submit" class="btn-primary">تأكيد الحجز</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="manualBookingModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
