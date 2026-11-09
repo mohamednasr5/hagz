@@ -16,7 +16,10 @@ import {
   formatCurrency, 
   showToast, 
   timeStringToMinutes,
-  populateTimeSelect,\n  findBookingConflict,\n  describeBookingConflict\n} from './utils.js';
+  populateTimeSelect,
+  findBookingConflict,
+  describeBookingConflict
+} from './utils.js';
 import { soundFX } from './audio-fx.js';
 
 let currentSettings = {
