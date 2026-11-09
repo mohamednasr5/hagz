@@ -315,7 +315,7 @@ function initModals() {
   const btnNewBooking = document.getElementById('btnOpenManualBookingModal');
   const manualModal = document.getElementById('manualBookingModal');
   const closeManualBtn = document.getElementById('closeManualBookingModal');
-  const manualForm = document.getElementById('manualBookingForm');\n  populateTimeSelect(document.getElementById('manualStartTime'), '09:00');
+  const manualForm = document.getElementById('manualBookingForm');\n  populateTimeSelect(document.getElementById('manualStartTime'), '09:00');\n  populateTimeSelect(document.getElementById('manualStartTime'), '09:00');
 
   const manualStartInput = document.getElementById('manualStartTime');
   populateTimeSelect(manualStartInput, '09:00');
