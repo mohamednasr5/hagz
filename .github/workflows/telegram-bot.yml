@@ -1,0 +1,43 @@
+name: Ahmadiah Telegram Bot
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ahmadiah-telegram-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  telegram-bot:
+    name: Run Telegram bot polling window
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      BOT_RUNNER_DURATION_MS: "240000"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate required secret
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+            echo "::error::Missing TELEGRAM_BOT_TOKEN. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Validate bot JavaScript
+        run: node --check bot-runner.js
+
+      - name: Start bot polling and booking notifications
+        run: node bot-runner.js
