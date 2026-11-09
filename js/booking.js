@@ -226,7 +226,13 @@ async function handleBookingSubmit(e) {
     }
 
     const startMinutes = timeStringToMinutes(startTime);
-    const durationMinutes = Math.round(duration * 60);\n    if (!Number.isFinite(durationMinutes) || durationMinutes < 30 || durationMinutes % 30 !== 0) {\n      showToast('مدة الحجز يجب أن تكون 30 دقيقة على الأقل وبمضاعفات نصف ساعة.', 'error');\n      return;\n    }\n    const endMinutes = startMinutes + durationMinutes;
+    const durationMinutes = Math.round(duration * 60);
+    if (!Number.isFinite(durationMinutes) || durationMinutes < 30 || durationMinutes % 30 !== 0) {
+      soundFX.playError();
+      showToast('مدة الحجز يجب أن تكون 30 دقيقة على الأقل وبمضاعفات نصف ساعة.', 'error');
+      return;
+    }
+    const endMinutes = startMinutes + durationMinutes;
     const breakdown = calculateBookingPrice(startTime, duration, currentSettings);
 
     // Compute exact startTimestamp and endTimestamp
