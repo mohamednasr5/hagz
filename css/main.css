@@ -1440,3 +1440,27 @@ body {
 @keyframes chairmanCardEnter{from{opacity:0;transform:translateY(20px) rotateX(4deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}
 @media(max-width:640px){.chairman-contact-card{padding:21px 16px;border-radius:20px}.chairman-contact-heading{gap:11px}.chairman-contact-heading p{font-size:.82rem}.chairman-contact-actions{grid-template-columns:1fr}.chairman-contact-person{align-items:flex-start;flex-direction:column;gap:5px}.chairman-contact-action{min-height:62px}}
 @media(prefers-reduced-motion:reduce){.chairman-contact-card,.chairman-contact-action{animation:none;transition:none}}
+
+
+/* Dedicated pitch booking manager contact card */
+.booking-manager-section{margin:30px 0 18px;perspective:1300px;scroll-margin-top:24px}
+.booking-manager-card{position:relative;isolation:isolate;overflow:hidden;padding:27px 30px;border-radius:25px;border:1px solid rgba(59,130,246,.3);background:radial-gradient(ellipse at 8% 5%,rgba(37,99,235,.17),transparent 43%),linear-gradient(135deg,rgba(15,37,67,.98),rgba(10,25,39,.98));box-shadow:0 18px 44px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.07);transform-style:preserve-3d;animation:chairmanCardEnter .75s both;transition:transform .35s ease,box-shadow .35s ease}
+.booking-manager-card:hover{transform:perspective(1100px) rotateX(1deg) translateY(-4px);box-shadow:0 27px 55px rgba(0,0,0,.34),0 0 25px rgba(59,130,246,.12)}
+.booking-manager-heading{display:flex;align-items:flex-start;gap:15px;position:relative;z-index:1}
+.booking-manager-icon{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;border-radius:17px;background:rgba(59,130,246,.16);border:1px solid rgba(96,165,250,.25);font-size:1.55rem;box-shadow:0 10px 25px rgba(0,0,0,.18);transform:translateZ(20px)}
+.booking-manager-heading h3{margin:0 0 7px;color:#f5f8ff;font-size:clamp(1.15rem,2vw,1.4rem);font-weight:900}
+.booking-manager-heading p{margin:0;color:#b7c8df;font-size:.9rem;line-height:1.9;max-width:850px}
+.booking-manager-person{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0 17px;padding:16px 18px;border-radius:16px;border:1px solid rgba(148,163,184,.14);background:rgba(255,255,255,.035)}
+.booking-manager-person span{color:#b7c8df;font-size:.88rem}
+.booking-manager-person strong{color:#fff;font-size:1.05rem;font-weight:900}
+.booking-manager-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.booking-manager-action{display:flex;align-items:center;gap:13px;min-height:68px;padding:13px 17px;border-radius:16px;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.12);box-shadow:0 9px 20px rgba(0,0,0,.18);transition:transform .25s ease,box-shadow .25s ease,filter .25s ease}
+.booking-manager-action:hover{transform:translateY(-4px) translateZ(10px);box-shadow:0 16px 30px rgba(0,0,0,.27);filter:brightness(1.08)}
+.booking-manager-action>span:first-child{font-size:1.55rem}
+.booking-manager-action small{display:block;margin-bottom:3px;color:rgba(255,255,255,.82);font-size:.75rem}
+.booking-manager-action bdi{display:block;font-weight:900;font-size:1rem}
+.booking-manager-call{background:linear-gradient(120deg,#1764bd,#174b8c)}
+.booking-manager-whatsapp{background:linear-gradient(120deg,#128b61,#08734f)}
+.booking-manager-arrow{margin-inline-start:auto;font-size:1.25rem}
+@media(max-width:640px){.booking-manager-card{padding:21px 16px;border-radius:20px}.booking-manager-heading{gap:11px}.booking-manager-heading p{font-size:.82rem}.booking-manager-actions{grid-template-columns:1fr}.booking-manager-person{align-items:flex-start;flex-direction:column;gap:5px}.booking-manager-action{min-height:62px}}
+@media(prefers-reduced-motion:reduce){.booking-manager-card,.booking-manager-action{animation:none;transition:none}}
