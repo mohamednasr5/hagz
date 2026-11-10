@@ -174,7 +174,7 @@ export function renderSlots() {
       statusClass = 'status-expired';
       nodeClass = 'status-node-orange';
       pillClass = 'status-pill-orange';
-      return { slot, index, status, statusLabel, statusClass, nodeClass, pillClass, isClickable, pricing, isNight, matchedBooking };
+      return { slot, index, status, statusLabel, statusClass, nodeClass, pillClass, isClickable, pricing, isNight, matchedBooking, matchedBookingId };
     }
 
     // ── TODAY: past time slots (time already gone) are expired/unclickable ──
@@ -231,7 +231,8 @@ export function renderSlots() {
       isClickable,
       pricing,
       isNight,
-      matchedBooking
+      matchedBooking,
+      matchedBookingId
     };
   });
 
@@ -310,21 +311,56 @@ function renderCardsGrid(evaluatedSlots) {
   if (!container) return;
 
   let html = '';
+  const renderedBookingIds = new Set();
 
   evaluatedSlots.forEach((item) => {
     const slot = item.slot;
-    const range12H = formatSlotRange12H(slot.startTime, slot.endTime);
-    const start12H = formatTime12H(slot.startTime);
-    const end12H = formatTime12H(slot.endTime);
+    const booking = item.matchedBooking;
+    const bookingId = item.matchedBookingId;
 
-    const periodTag = item.isNight 
-      ? '<span class="slot-period-tag period-night">🌙 ليلي</span>' 
-      : '<span class="slot-period-tag period-day">☀️ نهاري</span>';
+    // A single booking can overlap several half-hour slots. Render its full
+    // reservation once, not once for every half-hour segment it occupies.
+    if (booking && bookingId) {
+      if (renderedBookingIds.has(bookingId)) return;
+      renderedBookingIds.add(bookingId);
+    }
 
-    const cardId = `slot-card-${item.index}`;
+    const displayStart = booking ? booking.startTime : slot.startTime;
+    const displayEnd = booking ? booking.endTime : slot.endTime;
+    const range12H = formatSlotRange12H(displayStart, displayEnd);
+    const start12H = formatTime12H(displayStart);
+    const end12H = formatTime12H(displayEnd);
+
+    const bookingDurationMinutes = booking
+      ? Number(booking.durationMinutes) || Math.max(30,
+          timeStringToMinutes(booking.endTime) - timeStringToMinutes(booking.startTime))
+      : 30;
+    const bookingDurationHours = bookingDurationMinutes / 60;
+    const bookingPricing = booking
+      ? calculateBookingPrice(booking.startTime, bookingDurationHours, getPitchSettings())
+      : item.pricing;
+    const bookingIsNight = booking
+      ? bookingPricing.nightHours > 0
+      : item.isNight;
+
+    const periodTag = booking
+      ? (booking.period && booking.period.includes('ليل')
+          ? '<span class="slot-period-tag period-night">🌙 ليلي</span>'
+          : booking.period && booking.period.includes('نهار')
+            ? '<span class="slot-period-tag period-day">☀️ نهاري</span>'
+            : bookingIsNight
+              ? '<span class="slot-period-tag period-night">🌙 ليلي</span>'
+              : '<span class="slot-period-tag period-day">☀️ نهاري</span>')
+      : (item.isNight
+          ? '<span class="slot-period-tag period-night">🌙 ليلي</span>'
+          : '<span class="slot-period-tag period-day">☀️ نهاري</span>');
+
+    const cardId = booking && bookingId
+      ? `booking-card-${bookingId}`
+      : `slot-card-${item.index}`;
 
     html += `
-      <div id="${cardId}" class="slot-card ${item.statusClass}" data-start="${slot.startTime}" data-date="${selectedDateKey}">
+      <div id="${cardId}" class="slot-card ${item.statusClass}" data-start="${displayStart}" data-date="${selectedDateKey}" ${bookingId ? `data-booking-id="${bookingId}"` : ''}>
         <div class="slot-top-row">
           <div class="slot-time" style="font-size: 1.15rem; font-weight: 800; direction: rtl;">
             <span>${start12H}</span>
@@ -344,13 +380,13 @@ function renderCardsGrid(evaluatedSlots) {
             </span>
           </div>
 
-          ${item.matchedBooking ? `
+          ${booking ? `
             <div class="customer-tag">
-              👤 ${escapeHtml(item.matchedBooking.customerName || 'محجوز')}
+              👤 ${escapeHtml(booking.customerName || 'محجوز')}
             </div>
-            <div style="font-size:0.78rem;color:#fca5a5;font-weight:700;">⏱ المدة: ${Number(item.matchedBooking.durationMinutes) || 60} دقيقة</div>
-            <div style="font-size:0.78rem;color:#cbd5e1;">من ${formatTime12H(item.matchedBooking.startTime)} إلى ${formatTime12H(item.matchedBooking.endTime)}</div>
-            ${item.matchedBooking.notes ? `<div style="font-size: 0.78rem; color: #94a3b8;">📝 ${escapeHtml(item.matchedBooking.notes)}</div>` : ''}
+            <div style="font-size:0.78rem;color:#fca5a5;font-weight:700;">⏱ المدة: ${bookingDurationMinutes} دقيقة</div>
+            <div style="font-size:0.78rem;color:#cbd5e1;">من ${start12H} إلى ${end12H}</div>
+            ${booking.notes ? `<div style="font-size: 0.78rem; color: #94a3b8;">📝 ${escapeHtml(booking.notes)}</div>` : ''}
           ` : `
             <div style="font-size: 0.8rem; color: #94a3b8;">
               الملعب متاح ومضاء وجاهز للحجز
