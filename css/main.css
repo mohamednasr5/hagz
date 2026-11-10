@@ -1464,3 +1464,68 @@ body {
 .booking-manager-arrow{margin-inline-start:auto;font-size:1.25rem}
 @media(max-width:640px){.booking-manager-card{padding:21px 16px;border-radius:20px}.booking-manager-heading{gap:11px}.booking-manager-heading p{font-size:.82rem}.booking-manager-actions{grid-template-columns:1fr}.booking-manager-person{align-items:flex-start;flex-direction:column;gap:5px}.booking-manager-action{min-height:62px}}
 @media(prefers-reduced-motion:reduce){.booking-manager-card,.booking-manager-action{animation:none;transition:none}}
+
+
+/* Larger tactical circles: keep pending labels fully inside the circle */
+.player-slot-circle {
+  width: 96px;
+  height: 96px;
+  padding: 7px;
+  box-sizing: border-box;
+}
+@media (min-width: 640px) {
+  .player-slot-circle { width: 106px; height: 106px; }
+}
+.node-icon { font-size: 1.18rem; margin-bottom: 3px; }
+.node-subtext {
+  max-width: 100%;
+  padding: 0 2px;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.12;
+  font-size: .58rem;
+}
+.player-slot-circle.status-node-yellow .node-subtext {
+  font-size: .52rem;
+  line-height: 1.12;
+  max-width: 88px;
+}
+.player-slot-circle.status-node-yellow {
+  box-shadow: 0 0 20px rgba(245,158,11,.62), inset 0 2px 8px rgba(255,255,255,.12);
+}
+
+/* Live match: green field marker and continuously pulsing football */
+.player-slot-circle.status-node-live {
+  background: radial-gradient(circle at 35% 30%, #6ee7b7 0%, #10b981 48%, #047857 100%);
+  border: 3px solid #a7f3d0;
+  color: #fff;
+  box-shadow: 0 0 22px rgba(16,185,129,.78), inset 0 2px 10px rgba(255,255,255,.18);
+  animation: liveMatchCircleGlow 2.2s ease-in-out infinite;
+}
+.player-slot-circle.status-node-live .node-time-12h,
+.player-slot-circle.status-node-live .node-subtext {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55);
+}
+.player-slot-circle.status-node-live .node-icon-live {
+  display: inline-block;
+  transform-origin: center;
+  animation: liveFootballPulse 1.15s ease-in-out infinite;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,.7));
+}
+.player-slot-circle.status-node-live:hover {
+  box-shadow: 0 0 32px rgba(16,185,129,1), inset 0 2px 10px rgba(255,255,255,.2);
+}
+@keyframes liveFootballPulse {
+  0%, 100% { transform: scale(1) rotate(-8deg); }
+  50% { transform: scale(1.38) rotate(8deg); }
+}
+@keyframes liveMatchCircleGlow {
+  0%, 100% { box-shadow: 0 0 16px rgba(16,185,129,.55), inset 0 2px 8px rgba(255,255,255,.12); }
+  50% { box-shadow: 0 0 30px rgba(16,185,129,.95), inset 0 2px 12px rgba(255,255,255,.22); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .player-slot-circle.status-node-live { animation: none; }
+  .player-slot-circle.status-node-live .node-icon-live { animation: none; }
+}
