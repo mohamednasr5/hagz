@@ -211,11 +211,11 @@ export function renderSlots() {
           nodeClass = 'status-node-orange';
           pillClass = 'status-pill-orange';
         } else {
-          status = 'booked';
-          statusLabel = isCurrentTime ? '🔴 جاري الآن' : 'محجوز';
-          statusClass = 'status-booked';
-          nodeClass = 'status-node-red';
-          pillClass = 'status-pill-red';
+          status = isCurrentTime ? 'live' : 'booked';
+          statusLabel = isCurrentTime ? '🟢 جاري الآن' : 'محجوز';
+          statusClass = isCurrentTime ? 'status-live' : 'status-booked';
+          nodeClass = isCurrentTime ? 'status-node-live' : 'status-node-red';
+          pillClass = isCurrentTime ? 'status-pill-green' : 'status-pill-red';
         }
       }
     }
@@ -284,7 +284,7 @@ function renderTacticalFormation(evaluatedSlots) {
 
       html += `
         <div class="player-slot-circle ${item.nodeClass}" ${clickHandler} title="${range12H} - ${item.statusLabel}">
-          <span class="node-icon">⚽</span>
+          <span class="node-icon ${item.status === 'live' ? 'node-icon-live' : ''}">⚽</span>
           <span class="node-time-12h">${time12H}</span>
           <span class="node-subtext">${item.status === 'available' ? 'متاح' : item.statusLabel}</span>
 
