@@ -59,18 +59,18 @@ export function renderExpensesList(dateKey) {
 
     return `
       <tr>
-        <td style="font-weight: 700; color: #fff;">${escapeHtml(item.title)}</td>
-        <td>
+        <td data-label="بيان المصروف" style="font-weight: 700; color: #fff;">${escapeHtml(item.title)}</td>
+        <td data-label="التصنيف">
           <span style="background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 20px; font-size: 0.82rem;">
             ${getCategoryNameArabic(item.category)}
           </span>
         </td>
-        <td style="font-weight: 800; color: var(--accent-red);">${formatCurrency(amount)}</td>
-        <td style="color: #94a3b8; font-size: 0.85rem;">${escapeHtml(item.notes || '-')}</td>
-        <td style="font-size: 0.82rem; color: #64748b;">${new Date(item.createdAt || Date.now()).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true })}</td>
-        <td>
+        <td data-label="المبلغ" style="font-weight: 800; color: var(--accent-red);">${formatCurrency(amount)}</td>
+        <td data-label="ملاحظات" style="color: #94a3b8; font-size: 0.85rem;">${escapeHtml(item.notes || '-')}</td>
+        <td data-label="وقت التسجيل" style="font-size: 0.82rem; color: #64748b;">${new Date(item.createdAt || Date.now()).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true })}</td>
+        <td data-label="الإجراء">
           <button class="btn-action cancel" onclick="window.handleDeleteExpense('${dateKey}', '${id}')">
-            🗑️ حذف
+            🗑️ حذف المصروف
           </button>
         </td>
       </tr>

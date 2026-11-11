@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>لوحة تحكم إدارة ملعب مركز شباب الأحمدية | Admin Portal</title>
   <meta name="theme-color" content="#070d1e">
   <link rel="icon" type="image/svg+xml" href="../assets/icons/icon-192.svg">
@@ -31,16 +31,22 @@
     </div>
   </div>
 
+  <!-- Sidebar Backdrop Overlay (Mobile) -->
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
   <!-- Admin Dashboard Layout -->
   <div class="admin-layout">
     <!-- Sidebar Navigation -->
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="adminSidebar">
       <div class="sidebar-brand">
-        <img src="../assets/icons/icon-192.svg" alt="ملعب الأحمدية" class="sidebar-logo">
-        <div>
-          <h2>ملعب الأحمدية</h2>
-          <span style="font-size: 0.75rem; color: var(--accent-green); font-weight: 700;">لوحة المدير العام</span>
+        <div class="brand-info">
+          <img src="../assets/icons/icon-192.svg" alt="ملعب الأحمدية" class="sidebar-logo">
+          <div>
+            <h2>ملعب الأحمدية</h2>
+            <span class="brand-badge">لوحة المدير العام</span>
+          </div>
         </div>
+        <button id="closeSidebarBtn" class="sidebar-close-btn" aria-label="إغلاق القائمة">✕</button>
       </div>
 
       <nav class="sidebar-menu">
@@ -93,20 +99,23 @@
       <!-- Topbar Header -->
       <header class="admin-topbar">
         <div class="topbar-left">
-          <button id="toggleSidebarBtn" class="mobile-toggle-btn">☰</button>
-          <div class="topbar-title">نظام إدارة الملعب الخماسي</div>
+          <button id="toggleSidebarBtn" class="mobile-toggle-btn" aria-label="فتح القائمة">☰</button>
+          <div class="topbar-title-wrap">
+            <div class="topbar-title">نظام إدارة الملعب الخماسي</div>
+            <div class="topbar-subtitle">مركز شباب الأحمدية</div>
+          </div>
         </div>
 
         <div class="topbar-actions">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">التاريخ:</span>
-            <input type="date" id="adminDateSelect" class="form-input" style="padding: 6px 12px; font-size: 0.88rem;">
+          <div class="topbar-date-group">
+            <span class="topbar-date-label">التاريخ:</span>
+            <input type="date" id="adminDateSelect" class="form-input topbar-date-input">
           </div>
-          <button id="btnBookFromNow" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem; background: linear-gradient(135deg,#059669,#10b981);">⚡ حجز من الآن</button>
-          <button id="btnBookNext" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem; background: linear-gradient(135deg,#2563eb,#38bdf8);">⏭ الحجز التالي</button>
-          <button id="btnOpenManualBookingModal" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem;">
-            + إضافة حجز يدوي
-          </button>
+          <div class="topbar-quick-btns">
+            <button id="btnBookFromNow" class="btn-primary topbar-btn topbar-btn-now">⚡ حجز من الآن</button>
+            <button id="btnBookNext" class="btn-primary topbar-btn topbar-btn-next">⏭ الحجز التالي</button>
+            <button id="btnOpenManualBookingModal" class="btn-primary topbar-btn topbar-btn-manual">+ حجز يدوي</button>
+          </div>
         </div>
       </header>
 
@@ -221,7 +230,7 @@
             </div>
           </div>
 
-          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div class="finance-summary-grid">
             <div>
               <div style="color: var(--text-muted); font-size: 0.85rem;">اليوم والتاريخ:</div>
               <div id="finReportDayName" style="font-weight: 800; font-size: 1.1rem; color: #fff;">--</div>
@@ -606,6 +615,30 @@
       </form>
     </div>
   </div>
+
+  <!-- Mobile Admin Bottom Navigation Bar -->
+  <nav class="admin-mobile-nav" id="adminMobileNav" aria-label="شريط التنقل السريع للهاتف">
+    <button class="admin-mobile-nav-item active" data-tab="overview">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      <span>المؤشرات</span>
+    </button>
+    <button class="admin-mobile-nav-item" data-tab="bookings">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+      <span>الحجوزات</span>
+    </button>
+    <button class="admin-mobile-nav-item" data-tab="finance">
+      <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+      <span>الحسابات</span>
+    </button>
+    <button class="admin-mobile-nav-item" data-tab="expenses">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      <span>المصروفات</span>
+    </button>
+    <button id="mobileNavMenuTrigger" class="admin-mobile-nav-item" type="button" aria-label="فتح القائمة الكاملة">
+      <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      <span>المزيد</span>
+    </button>
+  </nav>
 
   <script type="module" src="../js/admin/admin-dashboard.js"></script>
 </body>

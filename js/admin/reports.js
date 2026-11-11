@@ -127,16 +127,16 @@ function renderMonthlyTable() {
 
     return `
       <tr>
-        <td style="font-weight: 800; color: #fff;">${monthArabic}</td>
-        <td>${m.totalBookings} حجز</td>
-        <td>${m.totalHours.toFixed(1)} ساعة</td>
-        <td style="color: var(--accent-green); font-weight: 800;">${formatCurrency(m.collectedRevenue)}</td>
-        <td style="color: var(--accent-red); font-weight: 700;">${formatCurrency(m.totalExpenses)}</td>
-        <td style="font-weight: 900; color: ${m.netIncome >= 0 ? '#34d399' : '#f87171'};">${formatCurrency(m.netIncome)}</td>
-        <td style="color: var(--accent-yellow);">${formatCurrency(m.outstanding)}</td>
-        <td>
+        <td data-label="الشهر والسنة" style="font-weight: 800; color: #fff;">${monthArabic}</td>
+        <td data-label="عدد الحجوزات">${m.totalBookings} حجز</td>
+        <td data-label="ساعات التشغيل">${m.totalHours.toFixed(1)} ساعة</td>
+        <td data-label="الإيراد المحصل" style="color: var(--accent-green); font-weight: 800;">${formatCurrency(m.collectedRevenue)}</td>
+        <td data-label="المصروفات" style="color: var(--accent-red); font-weight: 700;">${formatCurrency(m.totalExpenses)}</td>
+        <td data-label="صافي الدخل" style="font-weight: 900; color: ${m.netIncome >= 0 ? '#34d399' : '#f87171'};">${formatCurrency(m.netIncome)}</td>
+        <td data-label="المتبقي" style="color: var(--accent-yellow);">${formatCurrency(m.outstanding)}</td>
+        <td data-label="تصدير">
           <button class="btn-action edit" onclick="window.exportSingleMonthCSV('${mKey}')">
-            📊 تصدير
+            📊 تصدير الشهر
           </button>
         </td>
       </tr>

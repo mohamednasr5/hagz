@@ -129,6 +129,55 @@ body {
   gap: 12px;
 }
 
+@media (max-width: 640px) {
+  .app-header {
+    padding: 8px 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .logo-text h1 {
+    font-size: 0.95rem;
+  }
+
+  .logo-text span {
+    font-size: 0.65rem;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .header-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .egypt-clock-badge {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    gap: 5px;
+  }
+
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .logo-text span {
+    display: none;
+  }
+
+  .egypt-clock-badge {
+    display: none;
+  }
+}
+
 /* Live Egypt Clock Badge */
 .egypt-clock-badge {
   background: var(--bg-glass);

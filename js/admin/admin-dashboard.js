@@ -94,41 +94,98 @@ function initializeApp() {
 }
 
 /**
- * Tab Navigation Switcher
+ * Tab Navigation Switcher & Mobile Drawer Controls
  */
 function initNavigationTabs() {
-  const menuButtons = document.querySelectorAll('.menu-item[data-tab]');
+  const sidebar = document.getElementById('adminSidebar') || document.querySelector('.admin-sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const toggleBtn = document.getElementById('toggleSidebarBtn');
+  const closeBtn = document.getElementById('closeSidebarBtn');
+  const mobileNavMenuTrigger = document.getElementById('mobileNavMenuTrigger');
+
   const tabSections = document.querySelectorAll('.admin-tab-section');
 
-  menuButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
+  function switchTab(targetTab) {
+    if (!targetTab) return;
+
+    // Update desktop sidebar buttons
+    document.querySelectorAll('.menu-item[data-tab]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === targetTab);
+    });
+
+    // Update mobile bottom nav items
+    document.querySelectorAll('.admin-mobile-nav-item[data-tab]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === targetTab);
+    });
+
+    // Toggle active sections
+    tabSections.forEach(sec => {
+      sec.classList.toggle('active', sec.id === `tab-${targetTab}`);
+    });
+
+    // Close mobile drawer if open
+    closeSidebarDrawer();
+
+    // Trigger specific tab logic
+    if (targetTab === 'reports') {
+      loadMonthlyReports();
+    }
+
+    // Scroll smoothly to top of main content
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Bind all tab buttons (Sidebar & Bottom Nav)
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
       const targetTab = btn.getAttribute('data-tab');
-      menuButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      tabSections.forEach(sec => {
-        if (sec.id === `tab-${targetTab}`) {
-          sec.classList.add('active');
-        } else {
-          sec.classList.remove('active');
-        }
-      });
-
-      // Special tab triggers
-      if (targetTab === 'reports') {
-        loadMonthlyReports();
-      }
+      if (targetTab) switchTab(targetTab);
     });
   });
 
-  // Mobile sidebar toggle
-  const toggleBtn = document.getElementById('toggleSidebarBtn');
-  const sidebar = document.querySelector('.admin-sidebar');
-  if (toggleBtn && sidebar) {
-    toggleBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
+  function openSidebarDrawer() {
+    if (sidebar) sidebar.classList.add('open');
+    if (backdrop) backdrop.classList.add('active');
+    document.body.classList.add('sidebar-open');
+  }
+
+  function closeSidebarDrawer() {
+    if (sidebar) sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
+  }
+
+  // Toggle & Close listeners
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (sidebar?.classList.contains('open')) {
+        closeSidebarDrawer();
+      } else {
+        openSidebarDrawer();
+      }
     });
   }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeSidebarDrawer);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', closeSidebarDrawer);
+  }
+
+  if (mobileNavMenuTrigger) {
+    mobileNavMenuTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSidebarDrawer();
+    });
+  }
+
+  // Close sidebar when clicking links inside sidebar footer
+  document.querySelectorAll('.sidebar-footer .menu-item').forEach(link => {
+    link.addEventListener('click', closeSidebarDrawer);
+  });
 }
 
 /**
@@ -349,23 +406,23 @@ function renderBookingsTable() {
 
     return `
       <tr>
-        <td style="font-weight: 800; color: #fff;">${escapeHtml(b.customerName)}</td>
-        <td dir="ltr" style="text-align: right; color: #94a3b8;">${escapeHtml(b.customerPhone || '-')}</td>
-        <td style="direction: rtl; font-weight: 700;">${formatSlotRange12H(b.startTime, b.endTime)}</td>
-        <td>${(b.durationMinutes || 60) / 60} س</td>
-        <td>${statusBadge}</td>
-        <td style="font-weight: 800;">${formatCurrency(b.totalPrice)}</td>
-        <td style="color: var(--accent-green); font-weight: 800;">${formatCurrency(b.paidAmount || 0)}</td>
-        <td style="color: var(--accent-yellow); font-weight: 800;">${formatCurrency(remaining)}</td>
-        <td>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+        <td data-label="العميل / الفريق" class="td-customer" style="font-weight: 800; color: #fff;">${escapeHtml(b.customerName)}</td>
+        <td data-label="الهاتف" class="td-phone" dir="ltr" style="text-align: right; color: #94a3b8;">${escapeHtml(b.customerPhone || '-')}</td>
+        <td data-label="الموعد" class="td-time" style="direction: rtl; font-weight: 700;">${formatSlotRange12H(b.startTime, b.endTime)}</td>
+        <td data-label="المدة" class="td-duration">${(b.durationMinutes || 60) / 60} س</td>
+        <td data-label="الحالة" class="td-status">${statusBadge}</td>
+        <td data-label="القيمة الإجمالية" class="td-price" style="font-weight: 800;">${formatCurrency(b.totalPrice)}</td>
+        <td data-label="المدفوع" class="td-paid" style="color: var(--accent-green); font-weight: 800;">${formatCurrency(b.paidAmount || 0)}</td>
+        <td data-label="المتبقي" class="td-remaining" style="color: var(--accent-yellow); font-weight: 800;">${formatCurrency(remaining)}</td>
+        <td data-label="الإجراءات" class="td-actions">
+          <div class="table-actions-cluster">
             ${b.status === 'pending' ? `
               <button class="btn-action approve" onclick="window.handleApproveBooking('${b.bookingId}')">✓ تأكيد</button>
             ` : ''}
             <button class="btn-action pay" onclick="window.handleOpenPaymentModal('${b.bookingId}')">💰 دفعة</button>
             <button class="btn-action edit" onclick="window.handleOpenEditBooking('${b.bookingId}')">✏️ تعديل</button>
             <button class="btn-action cancel" onclick="window.handleCancelBooking('${b.bookingId}')">✕ إلغاء</button>
-            <button class="btn-action cancel" style="background: rgba(239,68,68,0.35);" onclick="window.handleDeleteBooking('${b.bookingId}')">🗑️ حذف</button>
+            <button class="btn-action delete" onclick="window.handleDeleteBooking('${b.bookingId}')">🗑️ حذف</button>
           </div>
         </td>
       </tr>
@@ -387,17 +444,17 @@ function renderPendingApprovals() {
   }
 
   container.innerHTML = pendingList.map(([id, b]) => `
-    <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <div style="font-weight: 800; font-size: 1.05rem; color: #fff;">👤 ${escapeHtml(b.customerName)}</div>
-        <div style="font-size: 0.85rem; color: #94a3b8; direction: rtl;">
-          ⏰ ${formatSlotRange12H(b.startTime, b.endTime)} • القيمة: ${formatCurrency(b.totalPrice)} • هاتف: ${escapeHtml(b.customerPhone)}
+    <div class="pending-request-card">
+      <div class="pending-card-info">
+        <div class="pending-card-name">👤 ${escapeHtml(b.customerName)}</div>
+        <div class="pending-card-meta">
+          ⏰ ${formatSlotRange12H(b.startTime, b.endTime)} • القيمة: ${formatCurrency(b.totalPrice)} • هاتف: ${escapeHtml(b.customerPhone || '-')}
         </div>
-        ${b.notes ? `<div style="font-size: 0.8rem; color: #fbbf24; margin-top: 4px;">📝 ${escapeHtml(b.notes)}</div>` : ''}
+        ${b.notes ? `<div class="pending-card-notes">📝 ${escapeHtml(b.notes)}</div>` : ''}
       </div>
-      <div style="display: flex; gap: 8px;">
+      <div class="pending-card-actions">
         <button class="btn-action approve" onclick="window.handleApproveBooking('${b.bookingId}')">✓ موافقة وتأكيد</button>
-        <button class="btn-action cancel" onclick="window.handleCancelBooking('${b.bookingId}')">رفض</button>
+        <button class="btn-action cancel" onclick="window.handleCancelBooking('${b.bookingId}')">رفض الحجز</button>
       </div>
     </div>
   `).join('');
