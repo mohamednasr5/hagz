@@ -16,10 +16,12 @@ export function calculateDailyFinances(bookingsObj = {}, expensesObj = {}) {
   let totalBookedHours = 0;
   let totalContractedRevenue = 0;
   let totalCashCollected = 0;
+  let totalBookingRevenue = 0;
+  let totalOtherIncome = 0;
   let totalOutstanding = 0;
 
   for (const [id, b] of Object.entries(bookingsObj)) {
-    if (b.status === 'cancelled') continue;
+    if (b.status !== 'confirmed') continue;
 
     totalBookings++;
     const hours = (Number(b.durationMinutes) || 60) / 60;
@@ -30,23 +32,27 @@ export function calculateDailyFinances(bookingsObj = {}, expensesObj = {}) {
     const remaining = Math.max(0, totalPrice - paidAmount);
 
     totalContractedRevenue += totalPrice;
+    totalBookingRevenue += totalPrice;
     totalCashCollected += paidAmount;
     totalOutstanding += remaining;
   }
 
   let totalExpenses = 0;
-  for (const [id, exp] of Object.entries(expensesObj)) {
-    totalExpenses += (Number(exp.amount) || 0);
+  for (const exp of Object.values(expensesObj || {})) {
+    if (exp.type === 'income') totalOtherIncome += Number(exp.amount) || 0;
+    else totalExpenses += Number(exp.amount) || 0;
   }
 
-  // Net income formula strictly: Collected Payments - Daily Expenses
-  const netDailyIncome = totalCashCollected - totalExpenses;
+  // Booking income is recognized at confirmation, not at match completion.
+  const netDailyIncome = totalBookingRevenue + totalOtherIncome - totalExpenses;
 
   return {
     totalBookings,
     totalBookedHours: Number(totalBookedHours.toFixed(1)),
     totalContractedRevenue,
     totalCashCollected,
+    totalBookingRevenue,
+    totalOtherIncome,
     totalOutstanding,
     totalExpenses,
     netDailyIncome
@@ -72,9 +78,11 @@ export function renderDailyFinancialReport(dateKey, finances) {
   if (bookingsCountEl) bookingsCountEl.textContent = `${finances.totalBookings} حجز`;
   if (hoursEl) hoursEl.textContent = `${finances.totalBookedHours} ساعة`;
   if (contractRevEl) contractRevEl.textContent = formatCurrency(finances.totalContractedRevenue);
-  if (cashCollectedEl) cashCollectedEl.textContent = formatCurrency(finances.totalCashCollected);
+  if (cashCollectedEl) cashCollectedEl.textContent = formatCurrency(finances.totalBookingRevenue);
   if (outstandingEl) outstandingEl.textContent = formatCurrency(finances.totalOutstanding);
   if (expensesEl) expensesEl.textContent = formatCurrency(finances.totalExpenses);
+  const otherIncomeEl = document.getElementById('finReportOtherIncome');
+  if (otherIncomeEl) otherIncomeEl.textContent = formatCurrency(finances.totalOtherIncome);
   
   if (netIncomeEl) {
     netIncomeEl.textContent = formatCurrency(finances.netDailyIncome);
