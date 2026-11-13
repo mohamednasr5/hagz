@@ -499,6 +499,20 @@ function initModals() {
   const manualForm = document.getElementById('manualBookingForm');
   const manualStartInput = document.getElementById('manualStartTime');
   populateTimeSelect(manualStartInput, '09:00');
+  const manualStartTime = document.getElementById('manualStartTime');
+  if (manualStartTime) manualStartTime.addEventListener('change', () => {
+    const [hour, minute] = manualStartTime.value.split(':').map(Number);
+    const now = new Date();
+    const cairoParts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Cairo', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(now).reduce((obj, part) => (obj[part.type] = part.value, obj), {});
+    const selectedDay = document.getElementById('manualBookingDate')?.value || selectedDateKey;
+    if (selectedDay !== cairoParts.year + '-' + cairoParts.month + '-' + cairoParts.day) return;
+    const selectedStart = cairoDateTimeToTimestamp(Number(cairoParts.year), Number(cairoParts.month), Number(cairoParts.day), manualStartTime.value);
+    if (selectedStart >= now.getTime()) return;
+    // Admin can register bookings in elapsed time; never block solely due to the clock.
+  });
+
 
   if (btnNewBooking && manualModal) {
     btnNewBooking.addEventListener('click', () => {
