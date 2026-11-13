@@ -55,17 +55,17 @@ export function renderExpensesList(dateKey) {
 
   tbody.innerHTML = entries.map(([id, item]) => {
     const amount = Number(item.amount) || 0;
-    total += amount;
+    if (item.type !== 'income') total += amount;
 
     return `
       <tr>
-        <td data-label="بيان المصروف" style="font-weight: 700; color: #fff;">${escapeHtml(item.title)}</td>
+        <td data-label="البيان" style="font-weight: 700; color: #fff;">${item.type === "income" ? "إيراد: " : ""}${escapeHtml(item.title)}</td>
         <td data-label="التصنيف">
           <span style="background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 20px; font-size: 0.82rem;">
             ${getCategoryNameArabic(item.category)}
           </span>
         </td>
-        <td data-label="المبلغ" style="font-weight: 800; color: var(--accent-red);">${formatCurrency(amount)}</td>
+        <td data-label="المبلغ" style="font-weight: 800; color: ${item.type === "income" ? "var(--accent-green)" : "var(--accent-red)"};">${formatCurrency(amount)}</td>
         <td data-label="ملاحظات" style="color: #94a3b8; font-size: 0.85rem;">${escapeHtml(item.notes || '-')}</td>
         <td data-label="وقت التسجيل" style="font-size: 0.82rem; color: #64748b;">${new Date(item.createdAt || Date.now()).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true })}</td>
         <td data-label="الإجراء">
@@ -82,6 +82,7 @@ export function renderExpensesList(dateKey) {
 
 function getCategoryNameArabic(category) {
   const map = {
+    other: 'إيرادات أخرى',
     electricity: '⚡ كهرباء عامة',
     lighting: '💡 كشافات وإنارة الملعب',
     maintenance: '🛠️ صيانة وتجهيزات',
@@ -98,6 +99,7 @@ function setupExpenseModalListeners(dateKey) {
     form.dataset.initialized = 'true';
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const type = document.getElementById('entryType')?.value || 'expense';
       const title = document.getElementById('expenseTitle').value.trim();
       const amount = Number(document.getElementById('expenseAmount').value) || 0;
       const category = document.getElementById('expenseCategory').value;
@@ -115,7 +117,8 @@ function setupExpenseModalListeners(dateKey) {
           expenseId: expRef.key,
           title,
           amount,
-          category,
+          type: type === 'income' ? 'income' : 'expense',
+          category: type === 'income' ? 'other' : category,
           notes,
           date: targetDate,
           createdAt: Date.now()
@@ -123,7 +126,7 @@ function setupExpenseModalListeners(dateKey) {
 
         form.reset();
         document.getElementById('expenseModal').classList.remove('active');
-        showToast('تم تسجيل المصروف وخصمه من إيراد اليوم بنجاح!', 'success');
+        showToast(type === 'income' ? 'تمت إضافة الإيراد الآخر إلى دخل اليوم.' : 'تم تسجيل المصروف وخصمه من دخل اليوم بنجاح!', 'success');
       } catch (err) {
         console.error('Error adding expense:', err);
         showToast('فشل تسجيل المصروف', 'error');
