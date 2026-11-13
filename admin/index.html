@@ -144,7 +144,7 @@
           <div class="kpi-card green">
             <span class="kpi-title">المقبوضات المحصلة اليوم</span>
             <span class="kpi-value" id="kpiDailyRevenue">0 ج.م</span>
-            <span class="kpi-badge" style="background: rgba(16,185,129,0.2); color: #34d399;">نقدية فعلية</span>
+            <span class="kpi-badge" style="background: rgba(16,185,129,0.2); color: #34d399;">إيرادات الحجوزات المؤكدة</span>
           </div>
 
           <div class="kpi-card red">
@@ -249,7 +249,7 @@
               <div id="finReportContractRev" style="font-weight: 800; font-size: 1.1rem; color: #fff;">0 ج.م</div>
             </div>
             <div>
-              <div style="color: var(--text-muted); font-size: 0.85rem;">المقبوضات المحصلة نقدياً:</div>
+              <div style="color: var(--text-muted); font-size: 0.85rem;">إيرادات الحجوزات المؤكدة:</div>
               <div id="finReportCashCollected" style="font-weight: 800; font-size: 1.25rem; color: var(--accent-green);">0 ج.م</div>
             </div>
             <div>
@@ -260,10 +260,14 @@
               <div style="color: var(--text-muted); font-size: 0.85rem;">إجمالي مصروفات اليوم:</div>
               <div id="finReportExpenses" style="font-weight: 800; font-size: 1.1rem; color: var(--accent-red);">0 ج.م</div>
             </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.85rem;">إيرادات أخرى:</div>
+              <div id="finReportOtherIncome" style="font-weight: 800; font-size: 1.1rem; color: var(--accent-green);">0 ج.م</div>
+            </div>
             <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 10px;">
               <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">صافي الدخل اليومي:</div>
               <div id="finReportNetIncome" style="font-weight: 900; font-size: 1.4rem; color: var(--accent-green);">0 ج.م</div>
-              <div style="font-size: 0.72rem; color: #94a3b8;">(المقبوضات المحصلة - المصروفات)</div>
+              <div style="font-size: 0.72rem; color: #94a3b8;">(إيرادات الحجوزات المؤكدة + الإيرادات الأخرى - المصروفات)</div>
             </div>
           </div>
         </div>
@@ -505,9 +509,9 @@
               <select id="manualStartTime" class="form-select" required aria-label="وقت بداية الحجز"></select>
             </div>
             <div class="form-group">
-              <label>المدة (ساعات):</label>
-              <input type="number" id="manualDuration" class="form-input" min="0.5" max="12" step="0.5" value="1" required>
-              <small class="field-hint">المدة بالساعات، بفواصل نصف ساعة.</small>
+              <label>المدة بالدقائق:</label>
+              <input type="number" id="manualDuration" class="form-input" min="1" max="720" step="1" value="60" required>
+              <small class="field-hint">أدخل أي مدة بالدقائق، مثل 60 أو 75 أو 90.</small>
             </div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -532,6 +536,28 @@
     </div>
   </div>
 
+<!-- Edit all booking details -->
+<div id="editBookingModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>✏️ تعديل جميع بيانات الحجز</h2>
+      <button type="button" id="closeEditBookingModal" class="modal-close-btn">&times;</button>
+    </div>
+    <form id="editBookingForm">
+      <div class="modal-body">
+        <input type="hidden" id="editBookingId">
+        <div class="form-group"><label>اسم العميل / الفريق:</label><input type="text" id="editCustomerName" class="form-input" maxlength="80" required></div>
+        <div class="form-group"><label>رقم الهاتف:</label><input type="tel" id="editCustomerPhone" class="form-input"></div>
+        <div class="form-group"><label>وقت بداية الحجز:</label><input type="time" id="editStartTime" class="form-input" required></div>
+        <div class="form-group"><label>المدة بالدقائق:</label><input type="number" id="editDuration" class="form-input" min="1" max="720" step="1" required><small class="field-hint">أي عدد من الدقائق مثل 60 أو 75 أو 90، ويسمح بالتعديل على موعد مضى.</small></div>
+        <div class="form-group"><label>المبلغ الإجمالي (ج.م):</label><input type="number" id="editTotalPrice" class="form-input" min="0" step="0.01" required></div>
+        <div class="form-group"><label>المبلغ المدفوع (ج.م):</label><input type="number" id="editPaidAmount" class="form-input" min="0" step="0.01"></div>
+        <div class="form-group"><label>ملاحظات:</label><textarea id="editNotes" class="form-textarea" rows="2"></textarea></div>
+      </div>
+      <div class="modal-footer"><button type="submit" class="btn-primary">حفظ التعديلات</button></div>
+    </form>
+  </div>
+</div>
   <!-- Partial Payment Modal -->
   <div id="paymentModal" class="modal-overlay">
     <div class="modal-card">
@@ -577,14 +603,21 @@
   <div id="expenseModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h2>🧾 تسجيل مصروف جديد للملعب</h2>
+        <h2>🧾 تسجيل إيراد أو مصروف</h2>
         <button type="button" class="modal-close-btn" onclick="document.getElementById('expenseModal').classList.remove('active')">&times;</button>
       </div>
       <form id="expenseForm">
         <div class="modal-body">
           <input type="hidden" id="expenseDateInput">
           <div class="form-group">
-            <label>بيان / اسم المصروف: *</label>
+            <label>نوع العملية: *</label>
+            <select id="entryType" class="form-select">
+              <option value="expense">مصروف</option>
+              <option value="income">إيراد آخر</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>البيان / الاسم: *</label>
             <input type="text" id="expenseTitle" class="form-input" placeholder="مثال: فاتورة كهرباء الكشافات" required>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -593,7 +626,7 @@
               <input type="number" id="expenseAmount" class="form-input" min="1" placeholder="50" required>
             </div>
             <div class="form-group">
-              <label>التصنيف: *</label>
+              <label>التصنيف (للمصروفات): *</label>
               <select id="expenseCategory" class="form-select">
                 <option value="lighting">💡 كشافات وإنارة</option>
                 <option value="electricity">⚡ كهرباء عامة</option>
@@ -610,7 +643,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn-primary" style="background: var(--accent-red);">تسجيل المصروف وخصمه</button>
+          <button type="submit" class="btn-primary" style="background: var(--accent-red);">حفظ العملية</button>
         </div>
       </form>
     </div>
