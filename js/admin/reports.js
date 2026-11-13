@@ -38,6 +38,7 @@ export async function loadMonthlyReports() {
           totalBookings: 0,
           totalHours: 0,
           collectedRevenue: 0,
+          otherIncome: 0,
           totalContracted: 0,
           dayRevenue: 0,
           nightRevenue: 0,
@@ -48,7 +49,7 @@ export async function loadMonthlyReports() {
       }
 
       for (const [id, b] of Object.entries(dayBookings)) {
-        if (b.status === 'cancelled') continue;
+        if (b.status !== 'confirmed') continue;
 
         monthsMap[monthKey].totalBookings++;
         const h = (Number(b.durationMinutes) || 60) / 60;
@@ -57,7 +58,7 @@ export async function loadMonthlyReports() {
         const total = Number(b.totalPrice) || 0;
         const paid = Number(b.paidAmount) || 0;
         monthsMap[monthKey].totalContracted += total;
-        monthsMap[monthKey].collectedRevenue += paid;
+        monthsMap[monthKey].collectedRevenue += total;
         monthsMap[monthKey].outstanding += Math.max(0, total - paid);
 
         const isNight = (b.period || '').includes('ليل');
@@ -78,6 +79,7 @@ export async function loadMonthlyReports() {
           totalBookings: 0,
           totalHours: 0,
           collectedRevenue: 0,
+          otherIncome: 0,
           totalContracted: 0,
           dayRevenue: 0,
           nightRevenue: 0,
@@ -88,13 +90,14 @@ export async function loadMonthlyReports() {
       }
 
       for (const [id, exp] of Object.entries(dayExpenses)) {
-        monthsMap[monthKey].totalExpenses += (Number(exp.amount) || 0);
+        if (exp.type === 'income') monthsMap[monthKey].otherIncome += Number(exp.amount) || 0;
+        else monthsMap[monthKey].totalExpenses += Number(exp.amount) || 0;
       }
     }
 
     // Compute Net Income for each month
     for (const key of Object.keys(monthsMap)) {
-      monthsMap[key].netIncome = monthsMap[key].collectedRevenue - monthsMap[key].totalExpenses;
+      monthsMap[key].netIncome = monthsMap[key].collectedRevenue + monthsMap[key].otherIncome - monthsMap[key].totalExpenses;
     }
 
     monthlyAggregations = monthsMap;
@@ -259,11 +262,11 @@ export function exportAllReportsCSV() {
   }
 
   let csvContent = '\uFEFF'; // UTF-8 Byte Order Mark for Arabic Excel compatibility
-  csvContent += 'الشهر,عدد الحجوزات,ساعات التشغيل,إجمالي الإيراد المحصل,إجمالي المصروفات,صافي الدخل,المبالغ المتبقية\n';
+  csvContent += 'الشهر,عدد الحجوزات,ساعات التشغيل,إيرادات الحجوزات,إيرادات أخرى,المصروفات,صافي الدخل,المبالغ المتبقية\n';
 
   months.forEach(k => {
     const m = monthlyAggregations[k];
-    csvContent += `"${k}",${m.totalBookings},${m.totalHours.toFixed(1)},${m.collectedRevenue},${m.totalExpenses},${m.netIncome},${m.outstanding}\n`;
+    csvContent += `"${k}",${m.totalBookings},${m.totalHours.toFixed(1)},${m.collectedRevenue},${m.otherIncome},${m.totalExpenses},${m.netIncome},${m.outstanding}\n`;
   });
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -286,7 +289,8 @@ window.exportSingleMonthCSV = function(monthKey) {
   csv += `الشهر,"${monthKey}"\n`;
   csv += `عدد الحجوزات,${m.totalBookings}\n`;
   csv += `ساعات التشغيل,${m.totalHours}\n`;
-  csv += `الإيراد المحصل,${m.collectedRevenue}\n`;
+  csv += `إيرادات الحجوزات,${m.collectedRevenue}\n`;
+  csv += `إيرادات أخرى,${m.otherIncome}\n`;
   csv += `المصروفات,${m.totalExpenses}\n`;
   csv += `صافي الدخل,${m.netIncome}\n`;
   csv += `المبالغ المتبقية,${m.outstanding}\n`;
