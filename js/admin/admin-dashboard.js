@@ -357,7 +357,7 @@ function updateDashboardUI() {
   setElText('kpiBookingsToday', totalBookings);
   setElText('kpiBookedHours', `${bookedHours.toFixed(1)} س`);
   setElText('kpiAvailableHours', `${availableHours.toFixed(1)} س`);
-  setElText('kpiDailyRevenue', formatCurrency(finances.totalCashCollected));
+  setElText('kpiDailyRevenue', formatCurrency(finances.totalBookingRevenue + finances.totalOtherIncome));
   setElText('kpiDailyExpenses', formatCurrency(finances.totalExpenses));
   
   const netEl = document.getElementById('kpiDailyNet');
@@ -409,7 +409,7 @@ function renderBookingsTable() {
         <td data-label="العميل / الفريق" class="td-customer" style="font-weight: 800; color: #fff;">${escapeHtml(b.customerName)}</td>
         <td data-label="الهاتف" class="td-phone" dir="ltr" style="text-align: right; color: #94a3b8;">${escapeHtml(b.customerPhone || '-')}</td>
         <td data-label="الموعد" class="td-time" style="direction: rtl; font-weight: 700;">${formatSlotRange12H(b.startTime, b.endTime)}</td>
-        <td data-label="المدة" class="td-duration">${(b.durationMinutes || 60) / 60} س</td>
+        <td data-label="المدة" class="td-duration">${Number(b.durationMinutes || 60)} دقيقة</td>
         <td data-label="الحالة" class="td-status">${statusBadge}</td>
         <td data-label="القيمة الإجمالية" class="td-price" style="font-weight: 800;">${formatCurrency(b.totalPrice)}</td>
         <td data-label="المدفوع" class="td-paid" style="color: var(--accent-green); font-weight: 800;">${formatCurrency(b.paidAmount || 0)}</td>
@@ -518,16 +518,15 @@ function initModals() {
         const name = document.getElementById('manualCustomerName').value.trim();
         const phone = document.getElementById('manualCustomerPhone').value.trim();
         const startTime = document.getElementById('manualStartTime').value;
-        const duration = Number(document.getElementById('manualDuration').value) || 1;
+        const durationMinutes = Number(document.getElementById('manualDuration').value);
         const customPrice = Number(document.getElementById('manualCustomPrice').value);
         const paidAmount = Number(document.getElementById('manualPaidAmount').value) || 0;
         const notes = document.getElementById('manualNotes').value.trim();
 
         const [sh, sm] = startTime.split(':').map(Number);
         const startMin = sh * 60 + sm;
-        const durationMinutes = Math.round(duration * 60);
-        if (!name || !Number.isFinite(durationMinutes) || durationMinutes < 30 || durationMinutes % 30 !== 0) {
-          showToast('أدخل اسم العميل ومدة صحيحة بمضاعفات 30 دقيقة.', 'error');
+        if (!name || !Number.isInteger(durationMinutes) || durationMinutes < 1 || durationMinutes > 720) {
+          showToast('أدخل اسم العميل ومدة صحيحة بالدقائق من 1 إلى 720.', 'error');
           return;
         }
         const endMin = startMin + durationMinutes;
@@ -542,7 +541,7 @@ function initModals() {
         const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
 
         const [y, m, d] = selectedDateKey.split('-').map(Number);
-        const startTimestamp = new Date(y, m - 1, d, sh, sm, 0).getTime();
+        const startTimestamp = cairoDateTimeToTimestamp(y, m, d, startTime);
         const endTimestamp = startTimestamp + (durationMinutes * 60 * 1000);
 
         const newRef = push(dbRefs.bookings(selectedDateKey));
@@ -566,7 +565,7 @@ function initModals() {
           updatedAt: Date.now()
         });
 
-        recordAuditLog('إنشاء حجز يدوي', `قام المسؤول بإنشاء حجز للعميل ${name} بمبلغ ${customPrice} ج.م`);
+        recordAuditLog('إنشاء حجز يدوي', `قام المسؤول بإنشاء حجز للعميل ${name} بمبلغ ${customPrice} ج.م لمدة ${durationMinutes} دقيقة`);
         manualModal.classList.remove('active');
         manualForm.reset();
         showToast('تم إنشاء الحجز بنجاح!', 'success');
@@ -576,6 +575,14 @@ function initModals() {
       }
     });
   }
+
+  const editForm = document.getElementById('editBookingForm');
+  const editClose = document.getElementById('closeEditBookingModal');
+  if (editForm && !editForm.dataset.bound) {
+    editForm.dataset.bound = 'true';
+    editForm.addEventListener('submit', saveBookingEdit);
+  }
+  if (editClose) editClose.addEventListener('click', () => document.getElementById('editBookingModal')?.classList.remove('active'));
 
   // Payment Modal
   const payModal = document.getElementById('paymentModal');
@@ -693,23 +700,66 @@ window.handleOpenPaymentModal = function(bookingId) {
 window.handleOpenEditBooking = function(bookingId) {
   const booking = dayBookings[bookingId];
   if (!booking) return;
-
-  const newName = prompt('تعديل اسم العميل:', booking.customerName);
-  if (newName === null) return;
-
-  const newPrice = prompt('تعديل القيمة الإجمالية (ج.م):', booking.totalPrice);
-  if (newPrice === null) return;
-
-  update(dbRefs.bookingItem(selectedDateKey, bookingId), {
-    customerName: newName.trim() || booking.customerName,
-    totalPrice: Number(newPrice) || booking.totalPrice,
-    remainingAmount: Math.max(0, (Number(newPrice) || booking.totalPrice) - (booking.paidAmount || 0)),
-    updatedAt: Date.now()
-  }).then(() => {
-    recordAuditLog('تعديل حجز', `تم تعديل بيانات الحجز ${booking.customerName}`);
-    showToast('تم تحديث بيانات الحجز بنجاح', 'success');
-  });
+  const modal = document.getElementById('editBookingModal');
+  if (!modal) return;
+  document.getElementById('editBookingId').value = bookingId;
+  document.getElementById('editCustomerName').value = booking.customerName || '';
+  document.getElementById('editCustomerPhone').value = booking.customerPhone || '';
+  document.getElementById('editStartTime').value = booking.startTime || '09:00';
+  document.getElementById('editDuration').value = Number(booking.durationMinutes) || 60;
+  document.getElementById('editTotalPrice').value = Number(booking.totalPrice) || 0;
+  document.getElementById('editPaidAmount').value = Number(booking.paidAmount) || 0;
+  document.getElementById('editNotes').value = booking.notes || '';
+  modal.classList.add('active');
 };
+
+async function saveBookingEdit(event) {
+  event.preventDefault();
+  const bookingId = document.getElementById('editBookingId').value;
+  const booking = dayBookings[bookingId];
+  if (!booking) return;
+  const customerName = document.getElementById('editCustomerName').value.trim();
+  const customerPhone = document.getElementById('editCustomerPhone').value.trim();
+  const startTime = document.getElementById('editStartTime').value;
+  const durationMinutes = Number(document.getElementById('editDuration').value);
+  const totalPrice = Number(document.getElementById('editTotalPrice').value);
+  const paidAmount = Number(document.getElementById('editPaidAmount').value) || 0;
+  const notes = document.getElementById('editNotes').value.trim();
+  if (!customerName || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(startTime) || !Number.isInteger(durationMinutes) || durationMinutes < 1 || durationMinutes > 720 || !Number.isFinite(totalPrice) || totalPrice < 0 || !Number.isFinite(paidAmount) || paidAmount < 0 || paidAmount > totalPrice) {
+    showToast('راجع الاسم والوقت والمدة بالدقائق والمبالغ المدخلة.', 'error');
+    return;
+  }
+  const startMinutes = timeStringToMinutes(startTime);
+  const endMinutes = startMinutes + durationMinutes;
+  const conflict = findBookingConflict(startMinutes, endMinutes, dayBookings, bookingId);
+  if (conflict) { showToast(describeBookingConflict(conflict), 'error'); return; }
+  const parts = selectedDateKey.split('-').map(Number);
+  const startTimestamp = cairoDateTimeToTimestamp(parts[0], parts[1], parts[2], startTime);
+  const endTimestamp = startTimestamp + durationMinutes * 60000;
+  const endTime = String(Math.floor(endMinutes / 60) % 24).padStart(2,'0') + ':' + String(endMinutes % 60).padStart(2,'0');
+  try {
+    await update(dbRefs.bookingItem(selectedDateKey, bookingId), {
+      customerName, customerPhone: customerPhone || 'غير مسجل', phone: customerPhone,
+      startTime, endTime, durationMinutes, startTimestamp, endTimestamp,
+      totalPrice, paidAmount, remainingAmount: Math.max(0, totalPrice - paidAmount), notes, updatedAt: Date.now()
+    });
+    recordAuditLog('تعديل كامل للحجز', 'تم تعديل حجز ' + booking.customerName + ' إلى ' + customerName + ' • ' + durationMinutes + ' دقيقة • ' + totalPrice + ' ج.م');
+    document.getElementById('editBookingModal').classList.remove('active');
+    showToast('تم تحديث جميع بيانات الحجز بنجاح', 'success');
+  } catch (error) {
+    console.error('Booking edit failed:', error);
+    showToast('تعذر حفظ تعديل الحجز', 'error');
+  }
+}
+function cairoDateTimeToTimestamp(year, month, day, time) {
+  const timeParts = time.split(':').map(Number);
+  const utcGuess = Date.UTC(year, month - 1, day, timeParts[0], timeParts[1]);
+  const offsetName = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Cairo', timeZoneName: 'longOffset' }).formatToParts(new Date(utcGuess)).find(p => p.type === 'timeZoneName')?.value || 'GMT+02:00';
+  const match = offsetName.match(/GMT([+-])(\\d{2}):(\\d{2})/);
+  if (!match) return utcGuess - 7200000;
+  const offsetMinutes = (match[1] === '-' ? -1 : 1) * (Number(match[2]) * 60 + Number(match[3]));
+  return utcGuess - offsetMinutes * 60000;
+}
 
 function recordAuditLog(action, detail) {
   try {
