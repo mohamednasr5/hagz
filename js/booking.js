@@ -175,6 +175,12 @@ async function handleBookingSubmit(e) {
   try {
     const customerName = document.getElementById('customerName').value.trim();
     const customerPhone = document.getElementById('customerPhone').value.trim();
+    const teamOneCaptain = document.getElementById('teamOneCaptain')?.value.trim() || '';
+    const teamTwoCaptain = document.getElementById('teamTwoCaptain')?.value.trim() || '';
+    if (Boolean(teamOneCaptain) !== Boolean(teamTwoCaptain)) {
+      showToast('أدخل اسم قائدي الفريقين معاً أو اترك الحقلين فارغين.', 'error');
+      return;
+    }
     const date = document.getElementById('bookingDate').value;
     const startTime = document.getElementById('bookingStartTime').value;
     const duration = Number(document.getElementById('bookingDuration').value) || 1;
@@ -270,6 +276,9 @@ async function handleBookingSubmit(e) {
     const bookingData = {
       bookingId: newBookingRef.key,
       customerName,
+      teamOneCaptain,
+      teamTwoCaptain,
+      matchType: teamOneCaptain && teamTwoCaptain ? 'two-teams' : 'standard',
       customerPhone: customerPhone || 'غير مسجل',
       phone: customerPhone || '',
       date,
