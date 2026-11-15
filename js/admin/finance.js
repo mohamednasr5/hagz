@@ -32,7 +32,7 @@ export function calculateDailyFinances(bookingsObj = {}, expensesObj = {}) {
     const remaining = Math.max(0, totalPrice - paidAmount);
 
     totalContractedRevenue += totalPrice;
-    totalBookingRevenue += totalPrice;
+    totalBookingRevenue += paidAmount;
     totalCashCollected += paidAmount;
     totalOutstanding += remaining;
   }
@@ -43,8 +43,8 @@ export function calculateDailyFinances(bookingsObj = {}, expensesObj = {}) {
     else totalExpenses += Number(exp.amount) || 0;
   }
 
-  // Booking income is recognized at confirmation, not at match completion.
-  const netDailyIncome = totalBookingRevenue + totalOtherIncome - totalExpenses;
+  // Net income reflects actual collected cash, not unpaid contract value.
+  const netDailyIncome = totalCashCollected + totalOtherIncome - totalExpenses;
 
   return {
     totalBookings,
@@ -78,7 +78,7 @@ export function renderDailyFinancialReport(dateKey, finances) {
   if (bookingsCountEl) bookingsCountEl.textContent = `${finances.totalBookings} حجز`;
   if (hoursEl) hoursEl.textContent = `${finances.totalBookedHours} ساعة`;
   if (contractRevEl) contractRevEl.textContent = formatCurrency(finances.totalContractedRevenue);
-  if (cashCollectedEl) cashCollectedEl.textContent = formatCurrency(finances.totalBookingRevenue);
+  if (cashCollectedEl) cashCollectedEl.textContent = formatCurrency(finances.totalCashCollected);
   if (outstandingEl) outstandingEl.textContent = formatCurrency(finances.totalOutstanding);
   if (expensesEl) expensesEl.textContent = formatCurrency(finances.totalExpenses);
   const otherIncomeEl = document.getElementById('finReportOtherIncome');
