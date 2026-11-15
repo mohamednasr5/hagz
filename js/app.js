@@ -177,7 +177,7 @@ function initMatchResultsListener() {
       const winnerName = r.winner === 'team1' ? one : r.winner === 'team2' ? two : '';
       const winnerBadge = r.winner === 'draw' ? '🤝 تعادل' : '🏆 فاز الكابتن ' + winnerName;
       const dateLabel = new Intl.DateTimeFormat('ar-EG',{timeZone:'Africa/Cairo',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(Number(r.publishedAt)));
-      return `<article class="match-result-card ${r.winner === 'draw' ? '' : 'winner-card'}" style="animation-delay:${Math.min(index,8)*65}ms">
+      return `<article class="match-result-card ${r.winner === 'draw' ? '' : 'winner-card'}" data-expires-at="${Number(r.expiresAt)}" style="animation-delay:${Math.min(index,8)*65}ms">
         <div class="match-result-top"><span>⚽ مباراة رقم ${escapeResultText(r.bookingId)}</span><span class="match-result-winner">${winnerBadge}</span></div>
         <div class="match-result-versus">
           <div class="match-result-team"><span class="match-result-team-name">فريق الكابتن ${one}</span><span class="match-result-team-caption">الفريق الأول</span><strong class="match-result-score">${Number(r.teamOneScore)}</strong></div>
