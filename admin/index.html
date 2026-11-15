@@ -310,54 +310,65 @@
         </div>
       </section>
 
-      <!-- TAB 5: REPORTS & CHARTS -->
+      <!-- TAB 5: FINANCIAL REPORTS -->
       <section id="tab-reports" class="admin-tab-section">
-        <div class="panel-box">
+        <div class="panel-box reports-panel">
           <div class="panel-header">
-            <div class="panel-title">
-              <span>📈 التقارير المالية الشهرية والرسوم البيانية</span>
-            </div>
-            <button id="exportAllReportsBtn" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem;">
-              📥 تصدير الكل إلى ملف Excel / CSV
-            </button>
-          </div>
-
-          <!-- Charts Grid -->
-          <div class="charts-grid" style="margin-bottom: 24px;">
-            <div class="chart-card">
-              <h4 style="margin-bottom: 12px; font-size: 1.05rem;">مقارنة الإيراد المحصل، المصروفات، وصافي الدخل شهرياً</h4>
-              <div id="financialOverviewChart" style="min-height: 260px; display: flex; align-items: center; justify-content: center;">
-                <!-- SVG Chart -->
-              </div>
-            </div>
-
-            <div class="chart-card">
-              <h4 style="margin-bottom: 12px; font-size: 1.05rem;">نسبة إيرادات الفترات النهارية مقابل الليلية (الكشافات)</h4>
-              <div id="dayNightRatioChart" style="min-height: 260px; display: flex; align-items: center; justify-content: center;">
-                <!-- Split Chart -->
-              </div>
+            <div class="panel-title"><span>📊 مركز التقارير المالية والتحليل التفصيلي</span></div>
+            <div class="report-actions">
+              <button id="printFinancialReportBtn" class="btn-primary">🖨️ طباعة التقرير / PDF</button>
+              <button id="exportFinancialReportCSVBtn" class="btn-secondary">📥 تصدير CSV</button>
             </div>
           </div>
-
-          <!-- Monthly Aggregations Table -->
-          <div class="table-responsive">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>الشهر والسنة</th>
-                  <th>عدد الحجوزات</th>
-                  <th>ساعات التشغيل</th>
-                  <th>الإيراد المحصل</th>
-                  <th>المصروفات</th>
-                  <th>صافي الدخل</th>
-                  <th>المتبقي</th>
-                  <th>تصدير</th>
-                </tr>
-              </thead>
-              <tbody id="monthlyReportsTableBody">
-                <!-- Monthly rows rendered here -->
-              </tbody>
-            </table>
+          <div class="report-filter-box">
+            <div class="report-presets" role="group" aria-label="الفترة">
+              <button type="button" class="report-preset active" data-period="day">اليوم</button>
+              <button type="button" class="report-preset" data-period="week">هذا الأسبوع</button>
+              <button type="button" class="report-preset" data-period="month">هذا الشهر</button>
+              <button type="button" class="report-preset" data-period="year">هذه السنة</button>
+              <button type="button" class="report-preset" data-period="custom">من تاريخ إلى تاريخ</button>
+            </div>
+            <div class="report-date-fields">
+              <label>من تاريخ<input type="date" id="reportFromDate" class="form-input"></label>
+              <label>إلى تاريخ<input type="date" id="reportToDate" class="form-input"></label>
+              <button type="button" id="applyReportFilterBtn" class="btn-primary">تطبيق الفلتر</button>
+            </div>
+            <div id="reportPeriodLabel" class="report-period-label">تقرير اليوم</div>
+          </div>
+          <div id="financialReportPrintable" class="financial-report-printable">
+            <div class="report-print-heading">
+              <h2>التقرير المالي – ملعب مركز شباب الأحمدية</h2>
+              <p id="reportPrintPeriod">الفترة المحددة</p>
+            </div>
+            <div class="report-kpi-grid">
+              <article class="report-kpi"><span>إيرادات الحجوزات المحصلة</span><strong id="rptBookingIncome">0 ج.م</strong></article>
+              <article class="report-kpi"><span>الإيرادات الأخرى</span><strong id="rptOtherIncome">0 ج.م</strong></article>
+              <article class="report-kpi expense"><span>إجمالي المصروفات</span><strong id="rptExpenses">0 ج.م</strong></article>
+              <article class="report-kpi net"><span>صافي الدخل</span><strong id="rptNet">0 ج.م</strong></article>
+              <article class="report-kpi"><span>عدد الحجوزات المؤكدة</span><strong id="rptBookingsCount">0</strong></article>
+              <article class="report-kpi"><span>ساعات التشغيل</span><strong id="rptHours">0</strong></article>
+              <article class="report-kpi"><span>إجمالي التعاقدات</span><strong id="rptContracted">0 ج.م</strong></article>
+              <article class="report-kpi"><span>مبالغ متبقية للتحصيل</span><strong id="rptOutstanding">0 ج.م</strong></article>
+            </div>
+            <div class="report-detail-grid">
+              <div class="report-detail-card">
+                <h3>تفصيل المصروفات حسب التصنيف</h3>
+                <div class="table-responsive"><table class="admin-table"><thead><tr><th>التصنيف</th><th>عدد العمليات</th><th>الإجمالي</th></tr></thead><tbody id="reportExpenseBreakdown"></tbody></table></div>
+              </div>
+              <div class="report-detail-card">
+                <h3>تفصيل الإيرادات الأخرى</h3>
+                <div class="table-responsive"><table class="admin-table"><thead><tr><th>البيان</th><th>عدد العمليات</th><th>الإجمالي</th></tr></thead><tbody id="reportIncomeBreakdown"></tbody></table></div>
+              </div>
+            </div>
+            <div class="report-detail-card">
+              <h3>تفاصيل الحجوزات والإيرادات المحصلة</h3>
+              <div class="table-responsive"><table class="admin-table"><thead><tr><th>التاريخ</th><th>العميل / الفريق</th><th>الموعد</th><th>القيمة</th><th>المحصل</th><th>المتبقي</th></tr></thead><tbody id="reportBookingsDetail"></tbody></table></div>
+            </div>
+            <div class="report-detail-card">
+              <h3>سجل المصروفات والإيرادات الأخرى</h3>
+              <div class="table-responsive"><table class="admin-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>التصنيف</th><th>المبلغ</th><th>ملاحظات</th></tr></thead><tbody id="reportTransactionsDetail"></tbody></table></div>
+            </div>
+            <footer class="report-print-footer">تم إنشاء التقرير من نظام إدارة ملعب مركز شباب الأحمدية</footer>
           </div>
         </div>
       </section>
