@@ -1177,3 +1177,9 @@ body {
  .report-actions,.report-filter-box,.admin-sidebar,.admin-topbar,.admin-mobile-nav{display:none!important}
  .report-detail-card{break-inside:avoid}
 }
+
+@media print{
+ .admin-layout,.admin-main,#tab-reports,.reports-panel{display:block!important}
+ #tab-reports{position:static!important;opacity:1!important;visibility:visible!important}
+ .admin-tab-section:not(#tab-reports){display:none!important}
+}
