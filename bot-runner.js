@@ -13,6 +13,7 @@ const RUN_DURATION_MS = Number(process.env.BOT_RUNNER_DURATION_MS || 240000);
 const ADMIN_CHAT_IDS = String(process.env.TELEGRAM_ADMIN_CHAT_IDS || '')
   .split(',').map(value => value.trim()).filter(Boolean);
 const RESULT_ADMIN_CODE = '521988';
+const RESULT_ADMIN_IDS = String(process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',').map(v => v.trim()).filter(Boolean);
 const RESULT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const runStartedAt = Date.now();
@@ -141,12 +142,12 @@ async function handleTelegramMessage(message) {
   console.log(`[Telegram Update] From: ${userName} (${chatId}) | Text: ${text}`);
 
   // Secure, per-admin score-entry wizard. The six-digit code is accepted only in private admin chats.
-  const adminChat = ADMIN_CHAT_IDS.includes(String(chatId));
+  const adminChat = RESULT_ADMIN_IDS.includes(String(chatId));
   const stateUrl = `${FIREBASE_DB_BASE}/telegramResultSessions/${chatId}.json`;
   const sessionResponse = await request(stateUrl);
   let session = sessionResponse && typeof sessionResponse === 'object' ? sessionResponse : null;
 
-  if (adminChat && text === RESULT_ADMIN_CODE) {
+  if (RESULT_ADMIN_IDS.includes(String(chatId)) && text === RESULT_ADMIN_CODE) {
     await request(stateUrl, { method: 'PUT' }, {
       step: 'booking',
       startedAt: Date.now(),
@@ -156,13 +157,13 @@ async function handleTelegramMessage(message) {
     return;
   }
 
-  if (session && adminChat && text === '/cancel') {
+  if (session && RESULT_ADMIN_IDS.includes(String(chatId)) && text === '/cancel') {
     await request(stateUrl, { method: 'DELETE' });
     await sendTelegramMessage(chatId, 'تم إلغاء تسجيل النتيجة. ✅');
     return;
   }
 
-  if (session && adminChat && text !== RESULT_ADMIN_CODE) {
+  if (session && RESULT_ADMIN_IDS.includes(String(chatId)) && text !== RESULT_ADMIN_CODE) {
     if (Date.now() - Number(session.startedAt || 0) > 15 * 60 * 1000) {
       await request(stateUrl, { method: 'DELETE' });
       await sendTelegramMessage(chatId, 'انتهت صلاحية جلسة التسجيل. أرسل 521988 للبدء مجدداً.');
