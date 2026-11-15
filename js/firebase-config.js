@@ -47,6 +47,7 @@ export const dbRefs = {
   expenseItem: (date, id) => ref(db, `expenses/${date}/${id}`),
   payments: () => ref(db, 'payments'),
   telegramSubscribers: () => ref(db, 'telegramSubscribers'),
+  matchResults: () => ref(db, 'matchResults'),
   auditLogs: () => ref(db, 'auditLogs'),
   adminUsers: () => ref(db, 'adminUsers')
 };
