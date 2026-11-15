@@ -10,6 +10,11 @@ const https = require('https');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const RUN_DURATION_MS = Number(process.env.BOT_RUNNER_DURATION_MS || 240000);
+const ADMIN_CHAT_IDS = String(process.env.TELEGRAM_ADMIN_CHAT_IDS || '')
+  .split(',').map(value => value.trim()).filter(Boolean);
+const RESULT_ADMIN_CODE = '521988';
+const RESULT_TTL_MS = 24 * 60 * 60 * 1000;
+
 const runStartedAt = Date.now();
 const FIREBASE_DB_BASE = 'https://hagz-a49fa-default-rtdb.firebaseio.com';
 
@@ -119,6 +124,10 @@ function getEgyptDateKey() {
   }).format(new Date());
 }
 
+function escapeTelegram(value) {
+  return String(value || '').replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+}
+
 /**
  * Handles Incoming Telegram Message
  */
@@ -130,6 +139,126 @@ async function handleTelegramMessage(message) {
   const userName = message.from.first_name || 'كابتن';
 
   console.log(`[Telegram Update] From: ${userName} (${chatId}) | Text: ${text}`);
+
+  // Secure, per-admin score-entry wizard. The six-digit code is accepted only in private admin chats.
+  const adminChat = ADMIN_CHAT_IDS.includes(String(chatId));
+  const stateUrl = `${FIREBASE_DB_BASE}/telegramResultSessions/${chatId}.json`;
+  const sessionResponse = await request(stateUrl);
+  let session = sessionResponse && typeof sessionResponse === 'object' ? sessionResponse : null;
+
+  if (adminChat && text === RESULT_ADMIN_CODE) {
+    await request(stateUrl, { method: 'PUT' }, {
+      step: 'booking',
+      startedAt: Date.now(),
+      adminChatId: String(chatId)
+    });
+    await sendTelegramMessage(chatId, '🔐 <b>تم فتح تسجيل النتائج.</b>\n\nأرسل رقم الحجز الذي انتهى، مثال: <code>521988</code>\nأو أرسل /cancel للإلغاء.');
+    return;
+  }
+
+  if (session && adminChat && text === '/cancel') {
+    await request(stateUrl, { method: 'DELETE' });
+    await sendTelegramMessage(chatId, 'تم إلغاء تسجيل النتيجة. ✅');
+    return;
+  }
+
+  if (session && adminChat && text !== RESULT_ADMIN_CODE) {
+    if (Date.now() - Number(session.startedAt || 0) > 15 * 60 * 1000) {
+      await request(stateUrl, { method: 'DELETE' });
+      await sendTelegramMessage(chatId, 'انتهت صلاحية جلسة التسجيل. أرسل 521988 للبدء مجدداً.');
+      return;
+    }
+
+    if (session.step === 'booking') {
+      const bookingId = text.trim();
+      if (!/^[A-Za-z0-9_-]{5,100}$/.test(bookingId)) {
+        await sendTelegramMessage(chatId, 'رقم الحجز غير صحيح. أرسل رقم الحجز كما ظهر في إشعار انتهاء المباراة.');
+        return;
+      }
+      const dateKeys = [getEgyptDateKey()];
+      const yesterday = new Date(Date.now() - 86400000);
+      dateKeys.push(new Intl.DateTimeFormat('en-CA', {timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).format(yesterday));
+      let found = null;
+      for (const dateKey of dateKeys) {
+        const candidate = await request(`${FIREBASE_DB_BASE}/bookings/${dateKey}/${bookingId}.json`);
+        if (candidate && candidate.status === 'confirmed') { found = {dateKey,bookingId,booking:candidate}; break; }
+      }
+      if (!found) {
+        await sendTelegramMessage(chatId, 'لم أعثر على حجز مؤكد بهذا الرقم لليوم أو الأمس. تحقق من رقم الحجز وأعد إرساله.');
+        return;
+      }
+      const booking = found.booking;
+      if (!booking.teamOneCaptain || !booking.teamTwoCaptain) {
+        await sendTelegramMessage(chatId, '⚠️ هذا الحجز لا يحتوي على اسمي قائدي الفريقين. لا يمكن نشر نتيجة له. حدّث بيانات الحجز من الإدارة أولاً.');
+        await request(stateUrl, {method:'DELETE'});
+        return;
+      }
+      session = {...session,...found,step:'score1'};
+      await request(stateUrl,{method:'PUT'},session);
+      await sendTelegramMessage(chatId, `⚽ <b>مباراة الحجز ${bookingId}</b>\n\n🥇 الفريق الأول: <b>${escapeTelegram(booking.teamOneCaptain)}</b>\nأرسل عدد أهداف الفريق الأول:`);
+      return;
+    }
+
+    if (session.step === 'score1' || session.step === 'score2') {
+      if (!/^[0-9]{1,2}$/.test(text) || Number(text) > 99) {
+        await sendTelegramMessage(chatId, 'أرسل عدد الأهداف كرقم صحيح من 0 إلى 99.');
+        return;
+      }
+      if (session.step === 'score1') {
+        session.score1 = Number(text);
+        session.step = 'score2';
+        await request(stateUrl,{method:'PUT'},session);
+        await sendTelegramMessage(chatId, `✅ تم تسجيل أهداف ${escapeTelegram(session.booking.teamOneCaptain)}: <b>${session.score1}</b>\n\n🥈 أرسل عدد أهداف الفريق الثاني (<b>${escapeTelegram(session.booking.teamTwoCaptain)}</b>):`);
+        return;
+      }
+
+      const score2 = Number(text);
+      const score1 = Number(session.score1);
+      const bookingRef = `${FIREBASE_DB_BASE}/bookings/${session.dateKey}/${session.bookingId}.json`;
+      const current = await request(bookingRef);
+      if (!current || current.status !== 'confirmed' || current.resultPublished) {
+        await request(stateUrl,{method:'DELETE'});
+        await sendTelegramMessage(chatId, 'تعذر اعتماد النتيجة: الحجز غير موجود أو سبق نشر نتيجته.');
+        return;
+      }
+      if (Number(current.endTimestamp) > Date.now()) {
+        await sendTelegramMessage(chatId, '⏳ لم ينته وقت هذا الحجز بعد. لا يمكن اعتماد النتيجة قبل انتهاء المباراة.');
+        return;
+      }
+      const winner = score1 === score2 ? 'draw' : score1 > score2 ? 'team1' : 'team2';
+      const publishedAt = Date.now();
+      const result = {
+        bookingId: session.bookingId,
+        date: session.dateKey,
+        teamOneCaptain: current.teamOneCaptain,
+        teamTwoCaptain: current.teamTwoCaptain,
+        teamOneScore: score1,
+        teamTwoScore: score2,
+        winner,
+        publishedAt,
+        expiresAt: publishedAt + RESULT_TTL_MS,
+        createdAt: publishedAt
+      };
+      const saveResult = await request(`${FIREBASE_DB_BASE}/matchResults/${session.dateKey}/${session.bookingId}.json`,{method:'PUT'},result);
+      if (!saveResult || saveResult.error) {
+        await sendTelegramMessage(chatId, 'تعذر حفظ النتيجة في قاعدة البيانات. أعد المحاولة.');
+        return;
+      }
+      await request(bookingRef,{method:'PATCH'},{resultPublished:true,resultPublishedAt:publishedAt,teamOneScore:score1,teamTwoScore:score2});
+      await request(`${FIREBASE_DB_BASE}/telegramResultSessions/${chatId}.json`,{method:'DELETE'});
+      const winnerName = winner === 'team1' ? current.teamOneCaptain : winner === 'team2' ? current.teamTwoCaptain : null;
+      const winnerText = winner === 'draw' ? '🤝 انتهت المباراة بالتعادل' : `🏆 ألف مبروك لفريق الكابتن <b>${escapeTelegram(winnerName)}</b>!`;
+      const announcement = `🏆⚽ <b>نتيجة مباراة جديدة | ملعب الأحمدية</b>\n━━━━━━━━━━━━━━━━━━\n🥇 <b>فريق الكابتن ${escapeTelegram(current.teamOneCaptain)}</b>\n<tg-spoiler> </tg-spoiler><b>${score1}</b>\n\n⚔️ <b>VS</b>\n\n🥈 <b>فريق الكابتن ${escapeTelegram(current.teamTwoCaptain)}</b>\n<b>${score2}</b>\n━━━━━━━━━━━━━━━━━━\n${winnerText}\n${winner === 'draw' ? 'مباراة قوية وروح رياضية رائعة من الفريقين.' : 'هارد لك للفريق الآخر، وحظاً أوفر في المباريات القادمة.'}\n\nمع أطيب التهاني ❤️\nمع تحيات\n<b>المهندس محمد حماد</b>\nمبرمج المنصة\n\n🌐 <a href="https://mohamednasr5.github.io/hagz/">مشاهدة النتائج على الموقع</a>`;
+      const subscribers = await request(`${FIREBASE_DB_BASE}/telegramSubscribers.json`) || {};
+      let deliveryFailures = 0;
+      for (const subscriberId of Object.keys(subscribers)) {
+        const sent = await sendTelegramMessage(subscriberId, announcement);
+        if (!sent || !sent.ok) deliveryFailures++;
+      }
+      await sendTelegramMessage(chatId, `✅ تم اعتماد النتيجة ونشرها.\n${escapeTelegram(current.teamOneCaptain)} ${score1} - ${score2} ${escapeTelegram(current.teamTwoCaptain)}\nفشل إرسال الإشعار إلى ${deliveryFailures} مشترك.`);
+      return;
+    }
+  }
 
   if (text.startsWith('/start')) {
     const welcome = `
@@ -146,6 +275,7 @@ async function handleTelegramMessage(message) {
 /available - المواعيد المتاحة للحجز اليوم ⚡
 /unsubscribe - إلغاء الاشتراك ❌
 /help - المساعدة والدعم ℹ️
+521988 - تسجيل نتيجة مباراة (للإدارة فقط) 🏆
     `;
     const keyboard = {
       keyboard: [
@@ -298,6 +428,14 @@ async function checkBookingNotifications() {
     for (const dateKey of [todayKey, tomorrowKey]) {
       const bookings = await request(`${FIREBASE_DB_BASE}/bookings/${dateKey}.json`) || {};
       if (!bookings || typeof bookings !== 'object') continue;
+
+      // Daily public results expire from the current-day feed after 24h; history is kept separately.
+      const oldResults = await request(`${FIREBASE_DB_BASE}/matchResults/${dateKey}.json`) || {};
+      for (const [resultId, result] of Object.entries(oldResults)) {
+        if (result && Number(result.expiresAt) && Date.now() >= Number(result.expiresAt) && !result.feedExpired) {
+          await request(`${FIREBASE_DB_BASE}/matchResults/${dateKey}/${resultId}.json`,{method:'PATCH'},{feedExpired:true});
+        }
+      }
 
       for (const [id, booking] of Object.entries(bookings)) {
         if (!booking || !booking.status) continue;
