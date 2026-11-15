@@ -1,306 +1,113 @@
-/**
- * reports.js - Monthly Financial Reports & Interactive Analytics
- * Aggregates all bookings and expenses across all months,
- * renders interactive SVG comparison charts, and exports reports to Excel/CSV.
- */
-
+/** Financial reports: date-range aggregation, detailed ledgers, CSV and A4 print/PDF. */
 import { dbRefs, get } from '../firebase-config.js';
 import { formatCurrency, showToast } from '../utils.js';
 
-let monthlyAggregations = {};
+let allBookings = {}, allExpenses = {}, currentRows = [];
+let activePeriod = 'day';
+const $ = id => document.getElementById(id);
+const n = value => Number(value) || 0;
+const safe = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayKey = () => new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const dateObj = key => { const [y,m,d]=key.split('-').map(Number); return new Date(y,m-1,d,12); };
+const keyOf = date => [date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
+const shift = (date,days) => { const d=new Date(date); d.setDate(d.getDate()+days); return d; };
+const money = value => formatCurrency(value);
+const categoryNames = {lighting:'كشافات وإنارة',electricity:'كهرباء عامة',maintenance:'صيانة وتجهيزات',cleaning:'نظافة ومطهرات',equipment:'كرات ومعدات',misc:'نثريات ومتنوع',other:'إيرادات أخرى'};
+const periodName = {day:'تقرير اليوم',week:'التقرير الأسبوعي',month:'التقرير الشهري',year:'التقرير السنوي',custom:'تقرير الفترة المحددة'};
 
-/**
- * Loads and compiles all monthly financial reports across database
- */
 export async function loadMonthlyReports() {
-  const container = document.getElementById('monthlyReportsTableBody');
-  if (container) {
-    container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">جارٍ تجميع التقارير الشهرية...</td></tr>`;
-  }
-
+  const label=$('reportPeriodLabel');
+  if(label) label.textContent='جارٍ تحميل جميع السجلات المالية...';
   try {
-    const [bookingsSnap, expensesSnap] = await Promise.all([
-      get(dbRefs.bookings()),
-      get(dbRefs.expenses())
-    ]);
-
-    const allBookings = bookingsSnap.val() || {};
-    const allExpenses = expensesSnap.val() || {};
-
-    const monthsMap = {};
-
-    // Group Bookings by Month (YYYY-MM)
-    for (const [dateKey, dayBookings] of Object.entries(allBookings)) {
-      const monthKey = dateKey.substring(0, 7); // YYYY-MM
-      if (!monthsMap[monthKey]) {
-        monthsMap[monthKey] = {
-          monthKey,
-          totalBookings: 0,
-          totalHours: 0,
-          collectedRevenue: 0,
-          otherIncome: 0,
-          totalContracted: 0,
-          dayRevenue: 0,
-          nightRevenue: 0,
-          totalExpenses: 0,
-          outstanding: 0,
-          netIncome: 0
-        };
-      }
-
-      for (const [id, b] of Object.entries(dayBookings)) {
-        if (b.status !== 'confirmed') continue;
-
-        monthsMap[monthKey].totalBookings++;
-        const h = (Number(b.durationMinutes) || 60) / 60;
-        monthsMap[monthKey].totalHours += h;
-
-        const total = Number(b.totalPrice) || 0;
-        const paid = Number(b.paidAmount) || 0;
-        monthsMap[monthKey].totalContracted += total;
-        monthsMap[monthKey].collectedRevenue += total;
-        monthsMap[monthKey].outstanding += Math.max(0, total - paid);
-
-        const isNight = (b.period || '').includes('ليل');
-        if (isNight) {
-          monthsMap[monthKey].nightRevenue += paid;
-        } else {
-          monthsMap[monthKey].dayRevenue += paid;
-        }
-      }
-    }
-
-    // Group Expenses by Month
-    for (const [dateKey, dayExpenses] of Object.entries(allExpenses)) {
-      const monthKey = dateKey.substring(0, 7);
-      if (!monthsMap[monthKey]) {
-        monthsMap[monthKey] = {
-          monthKey,
-          totalBookings: 0,
-          totalHours: 0,
-          collectedRevenue: 0,
-          otherIncome: 0,
-          totalContracted: 0,
-          dayRevenue: 0,
-          nightRevenue: 0,
-          totalExpenses: 0,
-          outstanding: 0,
-          netIncome: 0
-        };
-      }
-
-      for (const [id, exp] of Object.entries(dayExpenses)) {
-        if (exp.type === 'income') monthsMap[monthKey].otherIncome += Number(exp.amount) || 0;
-        else monthsMap[monthKey].totalExpenses += Number(exp.amount) || 0;
-      }
-    }
-
-    // Compute Net Income for each month
-    for (const key of Object.keys(monthsMap)) {
-      monthsMap[key].netIncome = monthsMap[key].collectedRevenue + monthsMap[key].otherIncome - monthsMap[key].totalExpenses;
-    }
-
-    monthlyAggregations = monthsMap;
-    renderMonthlyTable();
-    renderCharts();
-
-  } catch (err) {
-    console.error('Error generating monthly reports:', err);
-    if (container) {
-      container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 20px;">تعذر تحميل التقارير</td></tr>`;
-    }
+    const [b,e]=await Promise.all([get(dbRefs.bookings()),get(dbRefs.expenses())]);
+    allBookings=b.val()||{}; allExpenses=e.val()||{};
+    bindReportControls();
+    setPreset('day');
+  } catch(error) {
+    console.error('Financial reports load failed:',error);
+    showToast('تعذر تحميل بيانات التقارير المالية','error');
+    if(label) label.textContent='تعذر تحميل البيانات. تحقق من اتصال قاعدة البيانات.';
   }
 }
-
-function renderMonthlyTable() {
-  const container = document.getElementById('monthlyReportsTableBody');
-  if (!container) return;
-
-  const sortedMonths = Object.keys(monthlyAggregations).sort().reverse();
-
-  if (sortedMonths.length === 0) {
-    container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد سجلات مالية بعد</td></tr>`;
-    return;
-  }
-
-  container.innerHTML = sortedMonths.map((mKey) => {
-    const m = monthlyAggregations[mKey];
-    const [y, mm] = mKey.split('-');
-    const monthArabic = new Intl.DateTimeFormat('ar-EG', { month: 'long', year: 'numeric' }).format(new Date(y, mm - 1, 1));
-
-    return `
-      <tr>
-        <td data-label="الشهر والسنة" style="font-weight: 800; color: #fff;">${monthArabic}</td>
-        <td data-label="عدد الحجوزات">${m.totalBookings} حجز</td>
-        <td data-label="ساعات التشغيل">${m.totalHours.toFixed(1)} ساعة</td>
-        <td data-label="الإيراد المحصل" style="color: var(--accent-green); font-weight: 800;">${formatCurrency(m.collectedRevenue)}</td>
-        <td data-label="المصروفات" style="color: var(--accent-red); font-weight: 700;">${formatCurrency(m.totalExpenses)}</td>
-        <td data-label="صافي الدخل" style="font-weight: 900; color: ${m.netIncome >= 0 ? '#34d399' : '#f87171'};">${formatCurrency(m.netIncome)}</td>
-        <td data-label="المتبقي" style="color: var(--accent-yellow);">${formatCurrency(m.outstanding)}</td>
-        <td data-label="تصدير">
-          <button class="btn-action edit" onclick="window.exportSingleMonthCSV('${mKey}')">
-            📊 تصدير الشهر
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-/**
- * Draws High-Definition SVG Financial Charts
- */
-function renderCharts() {
-  const chartCanvas = document.getElementById('financialOverviewChart');
-  const dayNightCanvas = document.getElementById('dayNightRatioChart');
-
-  const months = Object.keys(monthlyAggregations).sort();
-  if (months.length === 0) return;
-
-  // Render Revenue vs Expense vs Net Bar Chart in SVG
-  if (chartCanvas) {
-    const maxVal = Math.max(...months.map(m => Math.max(
-      monthlyAggregations[m].collectedRevenue,
-      monthlyAggregations[m].totalExpenses,
-      Math.abs(monthlyAggregations[m].netIncome)
-    )), 100);
-
-    const barWidth = 24;
-    const gap = 16;
-    const groupWidth = barWidth * 3 + gap;
-    const svgWidth = Math.max(500, months.length * groupWidth + 80);
-    const svgHeight = 260;
-    const chartHeight = 180;
-
-    let barsHtml = '';
-
-    months.forEach((mKey, idx) => {
-      const data = monthlyAggregations[mKey];
-      const x = 50 + idx * groupWidth;
-
-      const revH = (data.collectedRevenue / maxVal) * chartHeight;
-      const expH = (data.totalExpenses / maxVal) * chartHeight;
-      const netH = Math.max(0, (data.netIncome / maxVal) * chartHeight);
-
-      const yRev = svgHeight - 40 - revH;
-      const yExp = svgHeight - 40 - expH;
-      const yNet = svgHeight - 40 - netH;
-
-      barsHtml += `
-        <!-- Month Label -->
-        <text x="${x + barWidth * 1.5}" y="${svgHeight - 16}" fill="#94a3b8" font-size="11" text-anchor="middle" font-family="Cairo">${mKey}</text>
-        <!-- Revenue Bar -->
-        <rect x="${x}" y="${yRev}" width="${barWidth}" height="${revH}" rx="4" fill="#10b981">
-          <title>الإيراد المحصل: ${data.collectedRevenue} ج.م</title>
-        </rect>
-        <!-- Expense Bar -->
-        <rect x="${x + barWidth + 3}" y="${yExp}" width="${barWidth}" height="${expH}" rx="4" fill="#ef4444">
-          <title>المصروفات: ${data.totalExpenses} ج.م</title>
-        </rect>
-        <!-- Net Income Bar -->
-        <rect x="${x + (barWidth + 3) * 2}" y="${yNet}" width="${barWidth}" height="${netH}" rx="4" fill="#3b82f6">
-          <title>الصافي: ${data.netIncome} ج.م</title>
-        </rect>
-      `;
-    });
-
-    chartCanvas.innerHTML = `
-      <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: 260px;">
-        <line x1="40" y1="${svgHeight - 40}" x2="${svgWidth - 20}" y2="${svgHeight - 40}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-        ${barsHtml}
-      </svg>
-    `;
-  }
-
-  // Render Day vs Night Revenue Split Chart
-  if (dayNightCanvas) {
-    let totalDay = 0;
-    let totalNight = 0;
-    months.forEach(k => {
-      totalDay += monthlyAggregations[k].dayRevenue;
-      totalNight += monthlyAggregations[k].nightRevenue;
-    });
-
-    const sum = totalDay + totalNight || 1;
-    const dayPercent = Math.round((totalDay / sum) * 100);
-    const nightPercent = 100 - dayPercent;
-
-    dayNightCanvas.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
-        <div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 6px;">
-            <span>☀️ إيراد الفترات النهارية</span>
-            <strong style="color: #fbbf24;">${formatCurrency(totalDay)} (${dayPercent}%)</strong>
-          </div>
-          <div style="width: 100%; height: 14px; background: rgba(0,0,0,0.4); border-radius: 8px; overflow: hidden;">
-            <div style="width: ${dayPercent}%; height: 100%; background: #fbbf24;"></div>
-          </div>
-        </div>
-
-        <div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 6px;">
-            <span>🌙 إيراد الفترات الليلية (الكشافات)</span>
-            <strong style="color: #818cf8;">${formatCurrency(totalNight)} (${nightPercent}%)</strong>
-          </div>
-          <div style="width: 100%; height: 14px; background: rgba(0,0,0,0.4); border-radius: 8px; overflow: hidden;">
-            <div style="width: ${nightPercent}%; height: 100%; background: #818cf8;"></div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-/**
- * Exports All Financial Reports to CSV format with UTF-8 BOM
- */
-export function exportAllReportsCSV() {
-  const months = Object.keys(monthlyAggregations).sort();
-  if (months.length === 0) {
-    showToast('لا توجد بيانات متاحة للتصدير', 'error');
-    return;
-  }
-
-  let csvContent = '\uFEFF'; // UTF-8 Byte Order Mark for Arabic Excel compatibility
-  csvContent += 'الشهر,عدد الحجوزات,ساعات التشغيل,إيرادات الحجوزات,إيرادات أخرى,المصروفات,صافي الدخل,المبالغ المتبقية\n';
-
-  months.forEach(k => {
-    const m = monthlyAggregations[k];
-    csvContent += `"${k}",${m.totalBookings},${m.totalHours.toFixed(1)},${m.collectedRevenue},${m.otherIncome},${m.totalExpenses},${m.netIncome},${m.outstanding}\n`;
+function bindReportControls(){
+  if($('reportFromDate')?.dataset.bound) return;
+  document.querySelectorAll('.report-preset').forEach(btn=>btn.addEventListener('click',()=>setPreset(btn.dataset.period)));
+  $('applyReportFilterBtn')?.addEventListener('click',()=>{
+    activePeriod='custom'; document.querySelectorAll('.report-preset').forEach(x=>x.classList.toggle('active',x.dataset.period==='custom'));
+    renderSelectedRange();
   });
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `تقرير_ملعب_الأحمدية_المالي_${new Date().toISOString().slice(0,10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showToast('تم تصدير التقرير المالي بنجاح إلى ملف CSV/Excel!', 'success');
+  $('printFinancialReportBtn')?.addEventListener('click',()=>{renderSelectedRange();window.print();});
+  $('exportFinancialReportCSVBtn')?.addEventListener('click',exportCurrentCSV);
+  if($('reportFromDate')) $('reportFromDate').dataset.bound='1';
 }
-
-window.exportSingleMonthCSV = function(monthKey) {
-  const m = monthlyAggregations[monthKey];
-  if (!m) return;
-
-  let csv = '\uFEFF';
-  csv += 'بيان التقرير المالي,القيمة\n';
-  csv += `الشهر,"${monthKey}"\n`;
-  csv += `عدد الحجوزات,${m.totalBookings}\n`;
-  csv += `ساعات التشغيل,${m.totalHours}\n`;
-  csv += `إيرادات الحجوزات,${m.collectedRevenue}\n`;
-  csv += `إيرادات أخرى,${m.otherIncome}\n`;
-  csv += `المصروفات,${m.totalExpenses}\n`;
-  csv += `صافي الدخل,${m.netIncome}\n`;
-  csv += `المبالغ المتبقية,${m.outstanding}\n`;
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `تقرير_شهر_${monthKey}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
+function setPreset(period){
+  activePeriod=period;
+  document.querySelectorAll('.report-preset').forEach(x=>x.classList.toggle('active',x.dataset.period===period));
+  const today=dateObj(todayKey()); let from=new Date(today),to=new Date(today);
+  if(period==='week'){const day=(today.getDay()+6)%7;from=shift(today,-day);}
+  if(period==='month') from=new Date(today.getFullYear(),today.getMonth(),1,12);
+  if(period==='year') from=new Date(today.getFullYear(),0,1,12);
+  if(period==='custom'){from=dateObj($('reportFromDate')?.value||todayKey());to=dateObj($('reportToDate')?.value||todayKey());}
+  if($('reportFromDate')) $('reportFromDate').value=keyOf(from);
+  if($('reportToDate')) $('reportToDate').value=keyOf(to);
+  renderSelectedRange();
+}
+function renderSelectedRange(){
+  const from=$('reportFromDate')?.value, to=$('reportToDate')?.value;
+  if(!from||!to||from>to){showToast('حدد تاريخ بداية ونهاية صحيحين','error');return;}
+  const rows=[];
+  let bookingsCount=0,hours=0,contracted=0,bookingIncome=0,outstanding=0,expenses=0,otherIncome=0;
+  const expenseGroups={},incomeGroups={};
+  for(const [date,day] of Object.entries(allBookings)){
+    if(date<from||date>to||!day||typeof day!=='object') continue;
+    for(const [id,b] of Object.entries(day)){
+      if(!b||b.status!=='confirmed') continue;
+      const total=n(b.totalPrice),paid=Math.min(total,n(b.paidAmount)),remaining=Math.max(0,total-paid);
+      bookingsCount++;hours+=n(b.durationMinutes||60)/60;contracted+=total;bookingIncome+=paid;outstanding+=remaining;
+      rows.push({date,id,b,total,paid,remaining});
+    }
+  }
+  const tx=[];
+  for(const [date,day] of Object.entries(allExpenses)){
+    if(date<from||date>to||!day||typeof day!=='object') continue;
+    for(const [id,item] of Object.entries(day)){
+      if(!item) continue;
+      const amount=n(item.amount),income=item.type==='income';
+      if(income){otherIncome+=amount;const k=item.title||'إيرادات أخرى';incomeGroups[k]=(incomeGroups[k]||{count:0,total:0});incomeGroups[k].count++;incomeGroups[k].total+=amount;}
+      else {expenses+=amount;const k=item.category||'misc';expenseGroups[k]=(expenseGroups[k]||{count:0,total:0});expenseGroups[k].count++;expenseGroups[k].total+=amount;}
+      tx.push({date,id,item,amount,income});
+    }
+  }
+  rows.sort((a,b)=>a.date.localeCompare(b.date)||String(a.b.startTime||'').localeCompare(String(b.b.startTime||'')));
+  tx.sort((a,b)=>a.date.localeCompare(b.date));
+  const net=bookingIncome+otherIncome-expenses;
+  const label=activePeriod==='custom'?periodName.custom:periodName[activePeriod]||'التقرير المالي';
+  const range=from===to?from:`من ${from} إلى ${to}`;
+  if($('reportPeriodLabel')) $('reportPeriodLabel').textContent=`${label} — ${range}`;
+  if($('reportPrintPeriod')) $('reportPrintPeriod').textContent=`${label} | ${range}`;
+  const values={rptBookingIncome:money(bookingIncome),rptOtherIncome:money(otherIncome),rptExpenses:money(expenses),rptNet:money(net),rptBookingsCount:bookingsCount,rptHours:hours.toFixed(1)+' ساعة',rptContracted:money(contracted),rptOutstanding:money(outstanding)};
+  Object.entries(values).forEach(([id,v])=>{if($(id))$(id).textContent=v;});
+  const expenseBody=$('reportExpenseBreakdown'),incomeBody=$('reportIncomeBreakdown');
+  const renderGroups=(groups,isIncome)=>Object.entries(groups).sort((a,b)=>b[1].total-a[1].total).map(([key,v])=>`<tr><td>${safe(categoryNames[key]||key)}</td><td>${v.count}</td><td style="color:${isIncome?'#34d399':'#f87171'};font-weight:800">${money(v.total)}</td></tr>`).join('')||'<tr><td colspan="3">لا توجد عمليات خلال الفترة</td></tr>';
+  if(expenseBody)expenseBody.innerHTML=renderGroups(expenseGroups,false);
+  if(incomeBody)incomeBody.innerHTML=renderGroups(incomeGroups,true);
+  const bookingBody=$('reportBookingsDetail');
+  if(bookingBody)bookingBody.innerHTML=rows.map(({date,b,total,paid,remaining})=>`<tr><td>${date}</td><td>${safe(b.customerName||'—')}</td><td>${safe(b.startTime||'—')} - ${safe(b.endTime||'—')}</td><td>${money(total)}</td><td style="color:#059669">${money(paid)}</td><td style="color:#b45309">${money(remaining)}</td></tr>`).join('')||'<tr><td colspan="6">لا توجد حجوزات مؤكدة خلال الفترة</td></tr>';
+  const txBody=$('reportTransactionsDetail');
+  if(txBody)txBody.innerHTML=tx.map(({date,item,amount,income})=>`<tr><td>${date}</td><td style="color:${income?'#059669':'#b91c1c'}">${income?'إيراد':'مصروف'}</td><td>${safe(item.title||'—')}</td><td>${safe(categoryNames[item.category]||item.category||'عام')}</td><td style="font-weight:800">${money(amount)}</td><td>${safe(item.notes||'—')}</td></tr>`).join('')||'<tr><td colspan="6">لا توجد عمليات أخرى خلال الفترة</td></tr>';
+  currentRows=[{type:'summary',from,to,bookingsCount,hours,contracted,bookingIncome,otherIncome,expenses,net,outstanding},...rows.map(x=>({type:'booking',...x})),...tx.map(x=>({type:x.income?'income':'expense',...x}))];
+}
+function exportCurrentCSV(){
+  if(!currentRows.length){showToast('لا توجد بيانات للتصدير','error');return;}
+  const csvCell=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const lines=[['النوع','التاريخ','البيان','التصنيف','القيمة','المحصل','المتبقي','ملاحظات']];
+  for(const r of currentRows){
+    if(r.type==='summary') lines.push(['ملخص',r.from+' - '+r.to,'عدد الحجوزات: '+r.bookingsCount+' | ساعات: '+r.hours,'الإيرادات المحصلة: '+r.bookingIncome+' | الإيرادات الأخرى: '+r.otherIncome+' | المصروفات: '+r.expenses+' | الصافي: '+r.net+' | المتبقي: '+r.outstanding,'','','','']);
+    else if(r.type==='booking') lines.push(['حجز',r.date,r.b.customerName,'حجز ملعب',r.total,r.paid,r.remaining,r.b.notes||'']);
+    else lines.push([r.type==='income'?'إيراد':'مصروف',r.date,r.item.title,categoryNames[r.item.category]||r.item.category,r.amount,'','',''+(r.item.notes||'')]);
+  }
+  const blob=new Blob(['\uFEFF'+lines.map(row=>row.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='تقرير_ملعب_الأحمدية_'+todayKey()+'.csv';a.click();URL.revokeObjectURL(url);
+}
+window.exportSingleMonthCSV=function(monthKey){setPreset('custom');$('reportFromDate').value=monthKey+'-01';$('reportToDate').value=monthKey+'-'+new Date(Number(monthKey.slice(0,4)),Number(monthKey.slice(5,7)),0).getDate();renderSelectedRange();exportCurrentCSV();};
+export function exportAllReportsCSV(){loadMonthlyReports();}
