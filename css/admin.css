@@ -1124,3 +1124,56 @@ body {
   }
 }
 
+
+
+/* Financial reports workspace */
+.reports-panel{overflow:hidden}
+.report-actions{display:flex;gap:10px;flex-wrap:wrap}
+.report-filter-box{background:rgba(255,255,255,.035);border:1px solid var(--admin-border);border-radius:16px;padding:18px;margin:18px 0 22px}
+.report-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.report-preset{border:1px solid var(--admin-border);background:rgba(255,255,255,.04);color:var(--text-muted);padding:9px 18px;border-radius:10px;font:inherit;font-weight:800;cursor:pointer}
+.report-preset.active,.report-preset:hover{background:rgba(16,185,129,.16);border-color:#10b981;color:#34d399}
+.report-date-fields{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+.report-date-fields label{display:flex;flex-direction:column;gap:7px;color:var(--text-muted);font-size:.85rem;font-weight:700;min-width:180px}
+.report-date-fields input{min-width:180px}
+.report-period-label{margin-top:14px;color:#34d399;font-weight:800}
+.report-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.report-kpi{background:linear-gradient(145deg,rgba(59,130,246,.12),rgba(15,23,42,.5));border:1px solid rgba(96,165,250,.2);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.report-kpi span{font-size:.82rem;color:var(--text-muted);font-weight:700}
+.report-kpi strong{font-size:1.3rem;color:#60a5fa;overflow-wrap:anywhere}
+.report-kpi.expense{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+.report-kpi.expense strong{color:#f87171}
+.report-kpi.net{background:rgba(16,185,129,.09);border-color:rgba(16,185,129,.28)}
+.report-kpi.net strong{color:#34d399}
+.report-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.report-detail-card{background:rgba(255,255,255,.025);border:1px solid var(--admin-border);border-radius:14px;padding:16px;margin-bottom:18px;min-width:0}
+.report-detail-card h3{font-size:1rem;color:#e2e8f0;margin:0 0 14px}
+.report-print-heading,.report-print-footer{display:none}
+.report-detail-card .table-responsive{max-width:100%}
+@media(max-width:900px){.report-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.report-detail-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.report-actions{width:100%}.report-actions button{flex:1}.report-date-fields,.report-date-fields label,.report-date-fields input{width:100%;min-width:0}.report-preset{flex:1 1 28%;padding:8px 6px;font-size:.8rem}.report-kpi strong{font-size:1.05rem}}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ body{background:#fff!important;color:#111!important}
+ body *{visibility:hidden!important}
+ #financialReportPrintable,#financialReportPrintable *{visibility:visible!important}
+ #financialReportPrintable{position:absolute;inset:0;width:100%;background:#fff!important;color:#111!important;font-family:Arial,sans-serif}
+ .report-print-heading,.report-print-footer{display:block;text-align:center}
+ .report-print-heading{border-bottom:3px solid #0f766e;padding-bottom:10px;margin-bottom:16px}
+ .report-print-heading h2{font-size:20px;color:#0f172a;margin:0 0 6px}
+ .report-print-heading p{color:#475569;margin:0}
+ .report-kpi-grid{grid-template-columns:repeat(4,1fr);gap:7px}
+ .report-kpi,.report-detail-card{background:#fff!important;border:1px solid #cbd5e1!important;border-radius:7px;break-inside:avoid;padding:9px}
+ .report-kpi span{color:#475569!important;font-size:9px}
+ .report-kpi strong{font-size:13px;color:#0f766e!important}
+ .report-kpi.expense strong{color:#b91c1c!important}
+ .report-detail-grid{grid-template-columns:1fr 1fr;gap:8px}
+ .report-detail-card h3{color:#0f172a!important;font-size:12px}
+ .admin-table{width:100%;border-collapse:collapse;font-size:9px}
+ .admin-table th{background:#e2e8f0!important;color:#0f172a!important}
+ .admin-table td,.admin-table th{border:1px solid #cbd5e1!important;color:#111!important;padding:5px!important}
+ .admin-table tr{break-inside:avoid}
+ .report-print-footer{margin-top:18px;border-top:1px solid #cbd5e1;padding-top:8px;color:#64748b;font-size:9px}
+ .report-actions,.report-filter-box,.admin-sidebar,.admin-topbar,.admin-mobile-nav{display:none!important}
+ .report-detail-card{break-inside:avoid}
+}
