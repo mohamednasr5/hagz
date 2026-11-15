@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBottomNav();
   initPwaAndServiceWorker();
   initNetworkListeners();
+  initMatchResultsListener();
 
   // Load today's schedule initially
   const initialDateKey = formatEgyptDateKey(currentDate);
@@ -148,6 +149,54 @@ function initDateNavigator() {
   }
 
   updateDateUI();
+}
+/** Live match-results feed; the public 24-hour feed is distinct from permanent booking history. */
+function initMatchResultsListener() {
+  const list = document.getElementById('matchResultsList');
+  if (!list) return;
+  const resultsRef = dbRefs.matchResults ? dbRefs.matchResults() : null;
+  if (!resultsRef) return;
+  const render = (snapshot) => {
+    const now = Date.now();
+    const all = snapshot.val() || {};
+    const results = [];
+    Object.entries(all).forEach(([date, day]) => {
+      Object.entries(day || {}).forEach(([id, result]) => {
+        if (!result || result.feedExpired || !Number(result.expiresAt) || Number(result.expiresAt) <= now) return;
+        results.push({...result, date, bookingId:id});
+      });
+    });
+    results.sort((a,b) => Number(b.publishedAt || 0) - Number(a.publishedAt || 0));
+    if (!results.length) {
+      list.innerHTML = '<div class="match-result-empty">⚽ لا توجد نتائج منشورة خلال آخر 24 ساعة.</div>';
+      return;
+    }
+    list.innerHTML = results.map((r,index) => {
+      const one = escapeResultText(r.teamOneCaptain);
+      const two = escapeResultText(r.teamTwoCaptain);
+      const winnerName = r.winner === 'team1' ? one : r.winner === 'team2' ? two : '';
+      const winnerBadge = r.winner === 'draw' ? '🤝 تعادل' : '🏆 فاز الكابتن ' + winnerName;
+      const dateLabel = new Intl.DateTimeFormat('ar-EG',{timeZone:'Africa/Cairo',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(Number(r.publishedAt)));
+      return `<article class="match-result-card ${r.winner === 'draw' ? '' : 'winner-card'}" style="animation-delay:${Math.min(index,8)*65}ms">
+        <div class="match-result-top"><span>⚽ مباراة رقم ${escapeResultText(r.bookingId)}</span><span class="match-result-winner">${winnerBadge}</span></div>
+        <div class="match-result-versus">
+          <div class="match-result-team"><span class="match-result-team-name">فريق الكابتن ${one}</span><span class="match-result-team-caption">الفريق الأول</span><strong class="match-result-score">${Number(r.teamOneScore)}</strong></div>
+          <span class="match-result-vs">VS</span>
+          <div class="match-result-team"><span class="match-result-team-name">فريق الكابتن ${two}</span><span class="match-result-team-caption">الفريق الثاني</span><strong class="match-result-score">${Number(r.teamTwoScore)}</strong></div>
+        </div>
+        <div class="match-result-bottom"><span>📅 ${dateLabel}</span><span>⏳ يختفي من قائمة اليوم بعد 24 ساعة</span></div>
+      </article>`;
+    }).join('');
+  };
+  onValue(resultsRef, render);
+  setInterval(() => {
+    const cards = list.querySelectorAll('.match-result-card');
+    cards.forEach(card => { const expiry = Number(card.dataset.expiresAt); if (expiry && expiry <= Date.now()) card.remove(); });
+  }, 60000);
+}
+
+function escapeResultText(value) {
+  return String(value || '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
 
 /**
