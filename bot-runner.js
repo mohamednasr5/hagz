@@ -438,6 +438,11 @@ async function checkBookingNotifications() {
       }
 
       for (const [id, booking] of Object.entries(bookings)) {
+        if (booking && booking.resultPublished && booking.resultPublishedAt && Date.now() - Number(booking.resultPublishedAt) >= RESULT_TTL_MS) {
+          const resultUrl = `${FIREBASE_DB_BASE}/matchResults/${dateKey}/${id}.json`;
+          const publicResult = await request(resultUrl);
+          if (publicResult && !publicResult.feedExpired) await request(resultUrl,{method:'PATCH'},{feedExpired:true});
+        }
         if (!booking || !booking.status) continue;
         const durationMinutes = Number(booking.durationMinutes) ||
           (booking.startTimestamp && booking.endTimestamp
