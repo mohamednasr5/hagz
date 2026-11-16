@@ -569,13 +569,21 @@
     <form id="editBookingForm">
       <div class="modal-body">
         <input type="hidden" id="editBookingId">
+        <div class="form-section-title">بيانات الحجز الأساسية</div>
         <div class="form-group"><label>اسم العميل / الفريق:</label><input type="text" id="editCustomerName" class="form-input" maxlength="80" required></div>
         <div class="form-group"><label>رقم الهاتف:</label><input type="tel" id="editCustomerPhone" class="form-input"></div>
+        <div class="form-group"><label>حالة الحجز:</label><select id="editBookingStatus" class="form-select"><option value="pending">قيد الانتظار</option><option value="confirmed">مؤكد</option><option value="cancelled">ملغي</option></select></div>
         <div class="form-group"><label>وقت بداية الحجز:</label><input type="time" id="editStartTime" class="form-input" required></div>
-        <div class="form-group"><label>المدة بالدقائق:</label><input type="number" id="editDuration" class="form-input" min="1" max="720" step="1" required><small class="field-hint">أي عدد من الدقائق مثل 60 أو 75 أو 90، ويسمح بالتعديل على موعد مضى.</small></div>
+        <div class="form-group"><label>المدة بالدقائق:</label><input type="number" id="editDuration" class="form-input" min="1" max="720" step="1" required><small class="field-hint">يمكن إدخال 60 أو 75 أو 90 دقيقة.</small></div>
+        <div class="form-section-title">بيانات الفريقين</div>
+        <div class="form-group"><label>اسم الفريق الأول:</label><input type="text" id="editTeamOneName" class="form-input" maxlength="80" placeholder="اسم الفريق الأول"></div>
+        <div class="form-group"><label>اسم / كابتن الفريق الأول:</label><input type="text" id="editTeamOneCaptain" class="form-input" maxlength="80" placeholder="اسم الكابتن"></div>
+        <div class="form-group"><label>اسم الفريق الثاني:</label><input type="text" id="editTeamTwoName" class="form-input" maxlength="80" placeholder="اسم الفريق الثاني"></div>
+        <div class="form-group"><label>اسم / كابتن الفريق الثاني:</label><input type="text" id="editTeamTwoCaptain" class="form-input" maxlength="80" placeholder="اسم الكابتن"></div>
+        <div class="form-section-title">الحسابات والملاحظات</div>
         <div class="form-group"><label>المبلغ الإجمالي (ج.م):</label><input type="number" id="editTotalPrice" class="form-input" min="0" step="0.01" required></div>
         <div class="form-group"><label>المبلغ المدفوع (ج.م):</label><input type="number" id="editPaidAmount" class="form-input" min="0" step="0.01"></div>
-        <div class="form-group"><label>ملاحظات:</label><textarea id="editNotes" class="form-textarea" rows="2"></textarea></div>
+        <div class="form-group"><label>ملاحظات:</label><textarea id="editNotes" class="form-textarea" rows="3"></textarea></div>
       </div>
       <div class="modal-footer"><button type="submit" class="btn-primary">حفظ التعديلات</button></div>
     </form>
