@@ -723,6 +723,11 @@ window.handleOpenEditBooking = function(bookingId) {
   document.getElementById('editDuration').value = Number(booking.durationMinutes) || 60;
   document.getElementById('editTotalPrice').value = Number(booking.totalPrice) || 0;
   document.getElementById('editPaidAmount').value = Number(booking.paidAmount) || 0;
+  document.getElementById('editBookingStatus').value = booking.status || 'pending';
+  document.getElementById('editTeamOneName').value = booking.teamOneName || '';
+  document.getElementById('editTeamTwoName').value = booking.teamTwoName || '';
+  document.getElementById('editTeamOneCaptain').value = booking.teamOneCaptain || '';
+  document.getElementById('editTeamTwoCaptain').value = booking.teamTwoCaptain || '';
   document.getElementById('editNotes').value = booking.notes || '';
   modal.classList.add('active');
 };
@@ -738,8 +743,13 @@ async function saveBookingEdit(event) {
   const durationMinutes = Number(document.getElementById('editDuration').value);
   const totalPrice = Number(document.getElementById('editTotalPrice').value);
   const paidAmount = Number(document.getElementById('editPaidAmount').value) || 0;
+  const status = document.getElementById('editBookingStatus').value;
+  const teamOneName = document.getElementById('editTeamOneName').value.trim();
+  const teamTwoName = document.getElementById('editTeamTwoName').value.trim();
+  const teamOneCaptain = document.getElementById('editTeamOneCaptain').value.trim();
+  const teamTwoCaptain = document.getElementById('editTeamTwoCaptain').value.trim();
   const notes = document.getElementById('editNotes').value.trim();
-  if (!customerName || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(startTime) || !Number.isInteger(durationMinutes) || durationMinutes < 1 || durationMinutes > 720 || !Number.isFinite(totalPrice) || totalPrice < 0 || !Number.isFinite(paidAmount) || paidAmount < 0 || paidAmount > totalPrice) {
+  if (!customerName || !['pending','confirmed','cancelled'].includes(status) || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(startTime) || !Number.isInteger(durationMinutes) || durationMinutes < 1 || durationMinutes > 720 || !Number.isFinite(totalPrice) || totalPrice < 0 || !Number.isFinite(paidAmount) || paidAmount < 0 || paidAmount > totalPrice) {
     showToast('راجع الاسم والوقت والمدة بالدقائق والمبالغ المدخلة.', 'error');
     return;
   }
@@ -755,7 +765,10 @@ async function saveBookingEdit(event) {
     await update(dbRefs.bookingItem(selectedDateKey, bookingId), {
       customerName, customerPhone: customerPhone || 'غير مسجل', phone: customerPhone,
       startTime, endTime, durationMinutes, startTimestamp, endTimestamp,
-      totalPrice, paidAmount, remainingAmount: Math.max(0, totalPrice - paidAmount), notes, updatedAt: Date.now()
+      totalPrice, paidAmount, remainingAmount: Math.max(0, totalPrice - paidAmount),
+      status, teamOneName, teamTwoName, teamOneCaptain, teamTwoCaptain,
+      matchType: teamOneCaptain && teamTwoCaptain ? 'two-teams' : 'standard',
+      notes, updatedAt: Date.now()
     });
     recordAuditLog('تعديل كامل للحجز', 'تم تعديل حجز ' + booking.customerName + ' إلى ' + customerName + ' • ' + durationMinutes + ' دقيقة • ' + totalPrice + ' ج.م');
     document.getElementById('editBookingModal').classList.remove('active');
