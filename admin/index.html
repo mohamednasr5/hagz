@@ -265,7 +265,9 @@
               <div id="finReportOtherIncome" style="font-weight: 800; font-size: 1.1rem; color: var(--accent-green);">0 ج.م</div>
             </div>
             <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 10px;">
-              <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">صافي الدخل اليومي:</div>
+              <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">راتب مسؤول الملعب (10%):</div>
+              <div id="finReportManagerSalary" style="font-weight: 800; font-size: 1.1rem; color: #fbbf24;">0 ج.م</div>
+              <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; margin-top:8px;">صافي الدخل اليومي بعد خصم الراتب والمصروفات:</div>
               <div id="finReportNetIncome" style="font-weight: 900; font-size: 1.4rem; color: var(--accent-green);">0 ج.م</div>
               <div style="font-size: 0.72rem; color: #94a3b8;">(إيرادات الحجوزات المؤكدة + الإيرادات الأخرى - المصروفات)</div>
             </div>
@@ -367,7 +369,9 @@
 
             <section class="report-settlement">
               <div class="settlement-line"><span>إجمالي الإيرادات</span><strong id="reportSettlementRevenue">0.00 ج.م</strong></div>
-              <div class="settlement-line deduction"><span>(−) إجمالي المصروفات</span><strong id="reportSettlementExpenses">0.00 ج.م</strong></div>
+              <div class="settlement-line deduction"><span>(−) المصروفات التشغيلية</span><strong id="reportSettlementExpenses">0.00 ج.م</strong></div>
+              <div class="settlement-line deduction"><span>(−) راتب المسؤول عن إدارة الملعب الخماسي (10%)</span><strong id="reportManagerSalary">0.00 ج.م</strong></div>
+              <div class="settlement-line deduction"><span>إجمالي الاستقطاعات</span><strong id="reportTotalDeductions">0.00 ج.م</strong></div>
               <div class="settlement-line net-line"><span>صافي الإيراد بعد خصم المصروفات</span><strong id="reportSettlementNet">0.00 ج.م</strong></div>
             </section>
 
