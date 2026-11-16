@@ -1183,3 +1183,83 @@ body {
  #tab-reports{position:static!important;opacity:1!important;visibility:visible!important}
  .admin-tab-section:not(#tab-reports){display:none!important}
 }
+
+
+/* Professional financial statement / A4 ledger print */
+.ledger-section{margin:22px 0;break-inside:auto}
+.ledger-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;padding:12px 15px;border-radius:10px;background:rgba(16,185,129,.11);border-right:4px solid #10b981}
+.ledger-title span{font-size:1.05rem;font-weight:900;color:#d1fae5}
+.ledger-title small{color:var(--text-muted);font-size:.78rem}
+.expense-ledger .ledger-title{background:rgba(239,68,68,.1);border-right-color:#ef4444}
+.expense-ledger .ledger-title span{color:#fecaca}
+.ledger-table{width:100%;border-collapse:collapse;min-width:650px;background:rgba(15,23,42,.2);font-size:.9rem}
+.ledger-table th,.ledger-table td{padding:12px 10px;border:1px solid rgba(148,163,184,.2);text-align:right;vertical-align:middle}
+.ledger-table thead th{background:#1e3a5f;color:#fff;font-weight:900;white-space:nowrap}
+.revenue-ledger .ledger-table thead th{background:#087f5b}
+.expense-ledger .ledger-table thead th{background:#a52834}
+.ledger-table tbody tr:nth-child(even){background:rgba(148,163,184,.055)}
+.ledger-table .serial-col,.ledger-table .serial-cell{text-align:center;width:48px}
+.ledger-table .amount-col,.ledger-table .ledger-amount{text-align:left;white-space:nowrap;font-weight:900;direction:ltr}
+.revenue-ledger .ledger-amount{color:#34d399}
+.expense-ledger .ledger-amount{color:#f87171}
+.ledger-table .ledger-item{font-weight:800}
+.ledger-table tfoot th{background:rgba(16,185,129,.14);font-weight:900;color:#6ee7b7;font-size:1rem}
+.expense-ledger .ledger-table tfoot th{background:rgba(239,68,68,.13);color:#fca5a5}
+.empty-ledger{text-align:center!important;color:var(--text-muted);padding:22px!important}
+.report-settlement{max-width:620px;margin:26px 0 20px auto;border:1px solid rgba(148,163,184,.25);border-radius:14px;overflow:hidden}
+.settlement-line{display:flex;justify-content:space-between;gap:16px;padding:14px 18px;border-bottom:1px solid rgba(148,163,184,.16);font-weight:800}
+.settlement-line strong{direction:ltr;white-space:nowrap}
+.settlement-line.deduction{color:#fca5a5;background:rgba(239,68,68,.07)}
+.settlement-line.net-line{background:rgba(16,185,129,.14);color:#6ee7b7;font-size:1.08rem;border:0}
+.report-extra-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}
+.report-extra-summary>div{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--admin-border);border-radius:10px}
+.report-extra-summary span{font-size:.76rem;color:var(--text-muted)}
+.report-extra-summary strong{font-size:.95rem;color:#e2e8f0}
+.report-print-heading{text-align:center;padding:18px 12px 16px;border-bottom:3px double #0f766e;margin-bottom:18px}
+.report-brand-mark{font-weight:900;color:#0f766e;font-size:1rem}
+.report-print-heading h2{font-size:1.55rem;margin:6px 0;color:#f8fafc}
+.report-print-heading>p{margin:0;color:var(--text-muted)}
+.report-period-band{display:inline-block;margin-top:12px;padding:8px 16px;border-radius:8px;background:rgba(59,130,246,.12);color:#bfdbfe}
+.report-print-footer{display:flex;justify-content:space-between;gap:15px;border-top:1px solid var(--admin-border);padding-top:14px;margin-top:28px;color:var(--text-muted);font-size:.8rem}
+@media(max-width:700px){.report-extra-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.ledger-title{align-items:flex-start;flex-direction:column}.report-settlement{max-width:100%}}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ html,body{background:#fff!important;color:#172033!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ body *{visibility:hidden!important}
+ #financialReportPrintable,#financialReportPrintable *{visibility:visible!important}
+ #financialReportPrintable{position:absolute!important;inset:0!important;width:100%!important;background:#fff!important;color:#172033!important;font-family:Arial,sans-serif!important;font-size:10pt!important}
+ #tab-reports,.reports-panel{display:block!important}
+ .admin-layout,.admin-main{display:block!important}
+ .admin-tab-section:not(#tab-reports){display:none!important}
+ .report-print-heading{padding:8px 0 12px;margin-bottom:12px;border-bottom:3px double #0f766e!important}
+ .report-brand-mark{color:#0f766e!important;font-size:11pt}
+ .report-print-heading h2{color:#102a43!important;font-size:18pt;margin:5px 0}
+ .report-print-heading>p{color:#475569!important}
+ .report-period-band{background:#eff6ff!important;color:#1e40af!important;border:1px solid #bfdbfe;padding:6px 12px}
+ .ledger-section{margin:14px 0 18px;break-inside:auto}
+ .ledger-title{padding:8px 11px;margin-bottom:6px;background:#d1fae5!important;border-right:4px solid #059669!important;break-after:avoid}
+ .ledger-title span{color:#065f46!important;font-size:11pt}
+ .ledger-title small{color:#475569!important}
+ .expense-ledger .ledger-title{background:#fee2e2!important;border-right-color:#dc2626!important}
+ .expense-ledger .ledger-title span{color:#991b1b!important}
+ .ledger-table{min-width:0!important;width:100%!important;border-collapse:collapse!important;font-size:9pt!important}
+ .ledger-table th,.ledger-table td{padding:7px 6px!important;border:1px solid #cbd5e1!important;color:#172033!important}
+ .ledger-table thead th{background:#087f5b!important;color:#fff!important}
+ .expense-ledger .ledger-table thead th{background:#a52834!important;color:#fff!important}
+ .ledger-table tbody tr:nth-child(even){background:#f8fafc!important}
+ .ledger-table .ledger-amount{color:#047857!important}
+ .expense-ledger .ledger-amount{color:#b91c1c!important}
+ .ledger-table tfoot th{background:#d1fae5!important;color:#065f46!important}
+ .expense-ledger .ledger-table tfoot th{background:#fee2e2!important;color:#991b1b!important}
+ .report-settlement{max-width:100%;margin:18px 0;border:1px solid #94a3b8!important;break-inside:avoid}
+ .settlement-line{padding:9px 13px;color:#172033!important;border-bottom:1px solid #cbd5e1!important}
+ .settlement-line.deduction{background:#fff1f2!important;color:#991b1b!important}
+ .settlement-line.net-line{background:#d1fae5!important;color:#065f46!important;font-size:12pt}
+ .report-extra-summary{grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+ .report-extra-summary>div{padding:8px;border:1px solid #cbd5e1!important;break-inside:avoid}
+ .report-extra-summary span{color:#475569!important;font-size:8pt}
+ .report-extra-summary strong{color:#172033!important;font-size:9pt}
+ .report-print-footer{display:flex!important;color:#475569!important;border-top:1px solid #cbd5e1!important;font-size:8pt;margin-top:20px}
+ .report-actions,.report-filter-box,.admin-sidebar,.admin-topbar,.admin-mobile-nav{display:none!important}
+ tr{break-inside:avoid}
+}
