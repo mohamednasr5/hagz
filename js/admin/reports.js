@@ -85,8 +85,14 @@ function renderSelectedRange(){
     ...bookings.filter(x=>x.paid>0).map(x=>({date:x.date,item:'إيراد حجز ملعب',details:`${x.b.customerName||'حجز'} • ${x.b.startTime||''} - ${x.b.endTime||''} • المدفوع من ${plainMoney(x.total)} ج.م`,amount:x.paid})),
     ...transactions.filter(x=>x.income).map(x=>({date:x.date,item:x.item.title||'إيراد آخر',details:x.item.notes||categoryNames[x.item.category]||'إيراد إضافي',amount:x.amount}))
   ].sort((a,b)=>a.date.localeCompare(b.date));
-  const expenseRows=transactions.filter(x=>!x.income).map(x=>({date:x.date,item:x.item.title||'مصروف',details:[categoryNames[x.item.category]||x.item.category||'عام',x.item.notes].filter(Boolean).join(' • '),amount:x.amount}));
-  const totalRevenue=bookingIncome+otherIncome,net=totalRevenue-expenses;
+  const totalRevenue=bookingIncome+otherIncome;
+  const managerSalary=totalRevenue*0.10;
+  const expenseRows=[
+    ...transactions.filter(x=>!x.income).map(x=>({date:x.date,item:x.item.title||'مصروف',details:[categoryNames[x.item.category]||x.item.category||'عام',x.item.notes].filter(Boolean).join(' • '),amount:x.amount})),
+    ...(managerSalary>0?[{date:from===to?from:`${from} — ${to}`,item:'راتب المسؤول عن إدارة الملعب الخماسي (10%)',details:`10% من إجمالي الإيرادات المحصلة البالغ ${plainMoney(totalRevenue)} ج.م`,amount:managerSalary,isManagerSalary:true}]:[])
+  ];
+  const totalDeductions=expenses+managerSalary;
+  const net=totalRevenue-totalDeductions;
   const label=activePeriod==='custom'?periodName.custom:periodName[activePeriod]||'التقرير المالي';
   const range=from===to?from:`من ${from} إلى ${to}`;
   if($('reportPeriodLabel')) $('reportPeriodLabel').textContent=`${label} — ${range}`;
@@ -96,11 +102,12 @@ function renderSelectedRange(){
   if($('reportRevenueDetail')) $('reportRevenueDetail').innerHTML=renderLedger(revenueRows);
   if($('reportExpenseDetail')) $('reportExpenseDetail').innerHTML=renderLedger(expenseRows);
   const set=(id,value)=>{if($(id))$(id).textContent=value;};
-  set('reportRevenueTotal',plainMoney(totalRevenue));set('reportExpenseTotal',plainMoney(expenses));
-  set('reportSettlementRevenue',money(totalRevenue));set('reportSettlementExpenses',money(expenses));set('reportSettlementNet',money(net));
+  set('reportRevenueTotal',plainMoney(totalRevenue));set('reportExpenseTotal',plainMoney(totalDeductions));
+  set('reportSettlementRevenue',money(totalRevenue));set('reportSettlementExpenses',money(expenses));
+  set('reportManagerSalary',money(managerSalary));set('reportTotalDeductions',money(totalDeductions));set('reportSettlementNet',money(net));
   set('rptBookingsCount',bookingsCount);set('rptHours',hours.toFixed(1)+' ساعة');set('rptContracted',money(contracted));set('rptOutstanding',money(outstanding));
   currentRows=[
-    {type:'meta',from,to,totalRevenue,expenses,net,bookingsCount,hours,contracted,outstanding},
+    {type:'meta',from,to,totalRevenue,expenses,managerSalary,totalDeductions,net,bookingsCount,hours,contracted,outstanding},
     ...revenueRows.map(x=>({type:'إيراد',...x})),
     ...expenseRows.map(x=>({type:'مصروف',...x}))
   ];
@@ -114,8 +121,10 @@ function exportCurrentCSV(){
   for(const r of currentRows){
     if(r.type==='meta'){
       lines.push(['','إجمالي الإيرادات','','','',r.totalRevenue]);
-      lines.push(['','إجمالي المصروفات','','','',r.expenses]);
-      lines.push(['','صافي الإيراد','','(الإيرادات - المصروفات)','',r.net]);
+      lines.push(['','مصروفات تشغيلية','','','',r.expenses]);
+      lines.push(['','راتب مسؤول الملعب (10%)','','10% من إجمالي الإيرادات المحصلة','',r.managerSalary]);
+      lines.push(['','إجمالي الاستقطاعات','','مصروفات + راتب المسؤول','',r.totalDeductions]);
+      lines.push(['','صافي الإيراد','','(الإيرادات - جميع الاستقطاعات)','',r.net]);
     } else lines.push([++serial,r.type,r.date,r.item,r.details,r.amount]);
   }
   const blob=new Blob(['\uFEFF'+lines.map(row=>row.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'});
