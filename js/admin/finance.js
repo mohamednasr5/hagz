@@ -43,8 +43,11 @@ export function calculateDailyFinances(bookingsObj = {}, expensesObj = {}) {
     else totalExpenses += Number(exp.amount) || 0;
   }
 
-  // Net income reflects actual collected cash, not unpaid contract value.
-  const netDailyIncome = totalCashCollected + totalOtherIncome - totalExpenses;
+  // Manager salary is 10% of gross collected income (bookings + other income).
+  const grossCollectedIncome = totalCashCollected + totalOtherIncome;
+  const managerSalary = grossCollectedIncome * 0.10;
+  // Net income excludes unpaid booking balances and deducts operating expenses + manager salary.
+  const netDailyIncome = grossCollectedIncome - totalExpenses - managerSalary;
 
   return {
     totalBookings,
@@ -55,6 +58,8 @@ export function calculateDailyFinances(bookingsObj = {}, expensesObj = {}) {
     totalOtherIncome,
     totalOutstanding,
     totalExpenses,
+    managerSalary,
+    grossCollectedIncome,
     netDailyIncome
   };
 }
@@ -84,6 +89,9 @@ export function renderDailyFinancialReport(dateKey, finances) {
   const otherIncomeEl = document.getElementById('finReportOtherIncome');
   if (otherIncomeEl) otherIncomeEl.textContent = formatCurrency(finances.totalOtherIncome);
   
+  const managerSalaryEl = document.getElementById('finReportManagerSalary');
+  if (managerSalaryEl) managerSalaryEl.textContent = formatCurrency(finances.managerSalary || 0);
+
   if (netIncomeEl) {
     netIncomeEl.textContent = formatCurrency(finances.netDailyIncome);
     netIncomeEl.style.color = finances.netDailyIncome >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
