@@ -336,40 +336,52 @@
             <div id="reportPeriodLabel" class="report-period-label">تقرير اليوم</div>
           </div>
           <div id="financialReportPrintable" class="financial-report-printable">
-            <div class="report-print-heading">
-              <h2>التقرير المالي – ملعب مركز شباب الأحمدية</h2>
-              <p id="reportPrintPeriod">الفترة المحددة</p>
-            </div>
-            <div class="report-kpi-grid">
-              <article class="report-kpi"><span>إيرادات الحجوزات المحصلة</span><strong id="rptBookingIncome">0 ج.م</strong></article>
-              <article class="report-kpi"><span>الإيرادات الأخرى</span><strong id="rptOtherIncome">0 ج.م</strong></article>
-              <article class="report-kpi expense"><span>إجمالي المصروفات</span><strong id="rptExpenses">0 ج.م</strong></article>
-              <article class="report-kpi net"><span>صافي الدخل</span><strong id="rptNet">0 ج.م</strong></article>
-              <article class="report-kpi"><span>عدد الحجوزات المؤكدة</span><strong id="rptBookingsCount">0</strong></article>
-              <article class="report-kpi"><span>ساعات التشغيل</span><strong id="rptHours">0</strong></article>
-              <article class="report-kpi"><span>إجمالي التعاقدات</span><strong id="rptContracted">0 ج.م</strong></article>
-              <article class="report-kpi"><span>مبالغ متبقية للتحصيل</span><strong id="rptOutstanding">0 ج.م</strong></article>
-            </div>
-            <div class="report-detail-grid">
-              <div class="report-detail-card">
-                <h3>تفصيل المصروفات حسب التصنيف</h3>
-                <div class="table-responsive"><table class="admin-table"><thead><tr><th>التصنيف</th><th>عدد العمليات</th><th>الإجمالي</th></tr></thead><tbody id="reportExpenseBreakdown"></tbody></table></div>
+            <header class="report-print-heading">
+              <div class="report-brand-mark">مركز شباب الأحمدية</div>
+              <h2>كشف الإيرادات والمصروفات</h2>
+              <p>ملعب مركز شباب الأحمدية</p>
+              <div class="report-period-band">مدة التقرير: <strong id="reportPrintPeriod">الفترة المحددة</strong></div>
+            </header>
+
+            <section class="ledger-section revenue-ledger">
+              <div class="ledger-title"><span>تفصيل الإيرادات</span><small>جميع المبالغ المحصلة خلال الفترة</small></div>
+              <div class="table-responsive">
+                <table class="ledger-table">
+                  <thead><tr><th class="serial-col">م</th><th>التاريخ</th><th>البند</th><th>التفاصيل</th><th class="amount-col">المبلغ (ج.م)</th></tr></thead>
+                  <tbody id="reportRevenueDetail"></tbody>
+                  <tfoot><tr><th colspan="4">إجمالي الإيرادات</th><th id="reportRevenueTotal">0.00</th></tr></tfoot>
+                </table>
               </div>
-              <div class="report-detail-card">
-                <h3>تفصيل الإيرادات الأخرى</h3>
-                <div class="table-responsive"><table class="admin-table"><thead><tr><th>البيان</th><th>عدد العمليات</th><th>الإجمالي</th></tr></thead><tbody id="reportIncomeBreakdown"></tbody></table></div>
+            </section>
+
+            <section class="ledger-section expense-ledger">
+              <div class="ledger-title"><span>تفصيل المصروفات</span><small>المصروفات المسجلة خلال الفترة</small></div>
+              <div class="table-responsive">
+                <table class="ledger-table">
+                  <thead><tr><th class="serial-col">م</th><th>التاريخ</th><th>البند</th><th>التفاصيل</th><th class="amount-col">المبلغ (ج.م)</th></tr></thead>
+                  <tbody id="reportExpenseDetail"></tbody>
+                  <tfoot><tr><th colspan="4">إجمالي المصروفات</th><th id="reportExpenseTotal">0.00</th></tr></tfoot>
+                </table>
               </div>
-            </div>
-            <div class="report-detail-card">
-              <h3>تفاصيل الحجوزات والإيرادات المحصلة</h3>
-              <div class="table-responsive"><table class="admin-table"><thead><tr><th>التاريخ</th><th>العميل / الفريق</th><th>الموعد</th><th>القيمة</th><th>المحصل</th><th>المتبقي</th></tr></thead><tbody id="reportBookingsDetail"></tbody></table></div>
-            </div>
-            <div class="report-detail-card">
-              <h3>سجل المصروفات والإيرادات الأخرى</h3>
-              <div class="table-responsive"><table class="admin-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>التصنيف</th><th>المبلغ</th><th>ملاحظات</th></tr></thead><tbody id="reportTransactionsDetail"></tbody></table></div>
-            </div>
-            <footer class="report-print-footer">تم إنشاء التقرير من نظام إدارة ملعب مركز شباب الأحمدية</footer>
-          </div>
+            </section>
+
+            <section class="report-settlement">
+              <div class="settlement-line"><span>إجمالي الإيرادات</span><strong id="reportSettlementRevenue">0.00 ج.م</strong></div>
+              <div class="settlement-line deduction"><span>(−) إجمالي المصروفات</span><strong id="reportSettlementExpenses">0.00 ج.م</strong></div>
+              <div class="settlement-line net-line"><span>صافي الإيراد بعد خصم المصروفات</span><strong id="reportSettlementNet">0.00 ج.م</strong></div>
+            </section>
+
+            <section class="report-extra-summary">
+              <div><span>عدد الحجوزات المؤكدة</span><strong id="rptBookingsCount">0</strong></div>
+              <div><span>ساعات التشغيل</span><strong id="rptHours">0 ساعة</strong></div>
+              <div><span>إجمالي قيمة الحجوزات</span><strong id="rptContracted">0 ج.م</strong></div>
+              <div><span>مبالغ الحجوزات المتبقية للتحصيل</span><strong id="rptOutstanding">0 ج.م</strong></div>
+            </section>
+            <footer class="report-print-footer">
+              <span>تم إعداد هذا الكشف من نظام إدارة ملعب مركز شباب الأحمدية</span>
+              <span>توقيع المسؤول: ____________________</span>
+            </footer>
+          </div></div>
         </div>
       </section>
 
