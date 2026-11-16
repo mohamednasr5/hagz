@@ -1263,3 +1263,10 @@ body {
  .report-actions,.report-filter-box,.admin-sidebar,.admin-topbar,.admin-mobile-nav{display:none!important}
  tr{break-inside:avoid}
 }
+
+/* Booking edit modal section headings */
+.form-section-title{font-weight:900;color:var(--accent-green);padding:10px 12px;margin:10px 0 4px;border-right:3px solid var(--accent-green);background:rgba(16,185,129,.08);border-radius:8px}
+#editBookingModal .modal-card{max-height:90vh;overflow-y:auto}
+#editBookingModal .modal-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#editBookingModal .form-section-title,#editBookingModal .form-group:has(#editCustomerName),#editBookingModal .form-group:has(#editNotes){grid-column:1/-1}
+@media(max-width:600px){#editBookingModal .modal-body{grid-template-columns:1fr}}
